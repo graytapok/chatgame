@@ -20,8 +20,8 @@ def create_app():
     db.init_app(app)
     ma.init_app(app)
     api.init_app(app)
-    login.init_app(app)
     mail.init_app(app)
+    login.init_app(app)
 
     with app.app_context():
         app.config["SESSION_MONGODB"] = db.connection["default"]
@@ -38,5 +38,5 @@ def create_app():
     @app.shell_context_processor
     def shell():
         return {"db": db, "models": models}
-
+    
     return app

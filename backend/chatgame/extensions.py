@@ -19,8 +19,8 @@ api = Api(
     description="Backend for chatgame",
     doc="/api/doc",
 )
-login = LoginManager()
 db = MongoEngine()
+sess = Session() 
+login = LoginManager()
 ma = Marshmallow()
-sess = Session()
 mail = Mail()

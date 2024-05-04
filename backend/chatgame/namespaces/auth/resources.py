@@ -1,9 +1,10 @@
-from flask import redirect, url_for
+from flask import redirect, url_for, request
 from flask_restx import Resource, marshal
 from flask_login import login_user, current_user, logout_user
 
 from email_validator import EmailNotValidError, validate_email
 from itsdangerous import BadSignature, SignatureExpired
+from icecream import ic
 
 from chatgame.extensions import safe, db
 from chatgame.utils.email import send_registration_email
@@ -31,7 +32,7 @@ class Login(Resource):
     @no_login_required
     @auth_ns.expect(login_parser)
     @auth_ns.doc(description="Login user")
-    @auth_ns.response(200, "Success", one_user_model)
+    @auth_ns.response(200, "Success")
     @auth_ns.response(400, "Bad request", invalid_input_model)
     @auth_ns.response(403, "Forbidden", no_login_required_model)
     def post(self):
@@ -43,7 +44,7 @@ class Login(Resource):
             raise InvalidInput()
         else:
             login_user(user, remember=args["remember"])
-            return redirect(url_for("current_user"))
+            return {}
 
 class Logout(Resource):
     @login_required

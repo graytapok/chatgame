@@ -33,9 +33,7 @@ def login_required(func):
 def no_login_required(func):
     @wraps(func)
     def wrapped(*args, **kwargs):
-        if current_user:
-            if current_user.is_authenticated:
-                raise NoLoginRequired
-            else:
-                return func(*args, **kwargs)
+        if current_user.is_authenticated:
+            raise NoLoginRequired
+        return func(*args, **kwargs)
     return wrapped
