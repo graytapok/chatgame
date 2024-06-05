@@ -1,11 +1,15 @@
 @import "tailwindcss/base";
+
+@import "@radix-ui/themes/styles.css";
+@import "react-toastify/dist/ReactToastify.css";
+
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-#root {
-    @apply 
-      bg-white
-      dark:bg-gray-600
-    ;
-  };
+body {
+    min-height: 100vh;
+  }
   
+.radix-themes {
+    --default-font-family: "Segoe UI";
+}

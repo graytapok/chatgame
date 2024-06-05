@@ -1,19 +1,23 @@
-import { Routes, Route } from "react-router-dom";
+import {
+  QueryProvider,
+  RoutingProvider,
+  AuthProvider,
+  ToastProvider,
+  ThemeProvider,
+} from "./providers";
 
-import Navbar from "./components/Navbar";
-import TestRoutes from "./pages/test/TestRoutes";
+import "./index.css";
 
 const App = () => {
   return (
-    <>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<p>Home</p>} />
-        <Route path="/about" element={<p>About</p>} />
-        <Route path="/test/*" element={<TestRoutes />} />
-        <Route path="*" element={<p>Not Found</p>} />
-      </Routes>
-    </>
+    <ThemeProvider>
+      <QueryProvider>
+        <AuthProvider>
+          <RoutingProvider />
+          <ToastProvider />
+        </AuthProvider>
+      </QueryProvider>
+    </ThemeProvider>
   );
 };
 

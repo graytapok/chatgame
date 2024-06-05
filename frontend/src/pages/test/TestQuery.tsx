@@ -1,0 +1,115 @@
+import {
+  Flex,
+  DataList,
+  Badge,
+  Code,
+  IconButton,
+  Link,
+} from "@radix-ui/themes";
+import { CopyIcon, CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
+import { FC, useContext } from "react";
+import { toast } from "react-toastify";
+
+import { useLogout, useLogin } from "src/api/auth";
+import AuthContext from "src/providers/AuthProvider";
+import Button from "src/components/ui/Button";
+
+const HelloIcon: FC = () => "👋";
+
+function TestQueryButtons() {
+  const { user } = useContext(AuthContext) as AuthContext;
+  const login = useLogin();
+  const logout = useLogout();
+
+  return (
+    <>
+      <Flex gap="2">
+        <Button
+          onClick={() =>
+            toast.info("React Toastify is awesome!", {
+              icon: HelloIcon,
+              toastId: "helloMessage",
+            })
+          }
+        >
+          Message
+        </Button>
+        <Button
+          onClick={() =>
+            login
+              .mutateAsync({
+                login: "Wadim",
+                password: "Wadim2204!",
+                remember: true,
+              })
+              .catch((e) =>
+                toast.error(e.response.data.message, {
+                  toastId: "loginError",
+                })
+              )
+          }
+        >
+          Login
+        </Button>
+        <Button
+          onClick={() =>
+            logout.mutateAsync().catch((e) =>
+              toast.error(e.response.data.message, {
+                toastId: "logoutError",
+              })
+            )
+          }
+        >
+          Logout
+        </Button>
+      </Flex>
+
+      {user && (
+        <DataList.Root className="m-3">
+          <DataList.Item align="center">
+            <DataList.Label minWidth="88px">Status</DataList.Label>
+            <DataList.Value>
+              <Badge color="jade" variant="soft" radius="full">
+                Authorized
+              </Badge>
+            </DataList.Value>
+          </DataList.Item>
+          <DataList.Item>
+            <DataList.Label minWidth="88px">ID</DataList.Label>
+            <DataList.Value>
+              <Flex align="center" gap="2">
+                <Code variant="ghost">{user.id}</Code>
+                <IconButton
+                  size="1"
+                  aria-label="Copy value"
+                  color="gray"
+                  variant="ghost"
+                >
+                  <CopyIcon />
+                </IconButton>
+              </Flex>
+            </DataList.Value>
+          </DataList.Item>
+          <DataList.Item>
+            <DataList.Label minWidth="88px">Username</DataList.Label>
+            <DataList.Value>{user.username}</DataList.Value>
+          </DataList.Item>
+          <DataList.Item>
+            <DataList.Label minWidth="88px">Email</DataList.Label>
+            <DataList.Value>
+              <Link href="mailto:vlad@workos.com">{user.email}</Link>
+            </DataList.Value>
+          </DataList.Item>
+          <DataList.Item>
+            <DataList.Label minWidth="88px">Admin</DataList.Label>
+            <DataList.Value>
+              {user.admin ? <CheckIcon /> : <Cross2Icon color="red" />}
+            </DataList.Value>
+          </DataList.Item>
+        </DataList.Root>
+      )}
+    </>
+  );
+}
+
+export default TestQueryButtons;

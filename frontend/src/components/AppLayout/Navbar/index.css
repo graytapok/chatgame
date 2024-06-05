@@ -1,0 +1,30 @@
+.navbar-link {
+  @apply 
+    relative inline-block align-middle
+    transition-all ease-linear
+    dark:text-gray-600
+    text-gray-500
+    text-lg
+
+    hover:text-black
+    dark:hover:text-white dark:hover:drop-shadow-2xl
+
+    after:absolute 
+    after:w-[100%] after:h-[1.5px] 
+    after:top-[100%] after:left-0
+    after:transition-transform after:duration-500 after:scale-x-0 after:origin-right
+    after:bg-sky-500
+
+    hover:after:transform 
+    hover:after:scale-x-100
+    hover:after:origin-left
+  ;
+}
+
+.navbar-link-active {
+  @apply
+  text-black 
+  dark:text-white
+  ;
+}
+

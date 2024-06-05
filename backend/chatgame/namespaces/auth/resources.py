@@ -1,13 +1,10 @@
-from flask import redirect, url_for, request
 from flask_restx import Resource, marshal
 from flask_login import login_user, current_user, logout_user
 
-from email_validator import EmailNotValidError, validate_email
 from itsdangerous import BadSignature, SignatureExpired
-from icecream import ic
 
-from chatgame.extensions import safe, db
-from chatgame.utils.email import send_registration_email
+from chatgame.extensions import safe
+from chatgame.utils.email import *
 from chatgame.utils.funcs import get_user_by_login
 from chatgame.utils.errors import InvalidInput
 from chatgame.utils.models import *
@@ -20,6 +17,7 @@ from ..auth import auth_ns
 from .parser import *
 from .models import *
 
+
 class Default(Resource):
     @login_required
     @auth_ns.doc(description="Get current user")
@@ -28,23 +26,28 @@ class Default(Resource):
     def get(self):
         return {"user": UserSchema().dump(current_user)}, 200
 
+
 class Login(Resource):
     @no_login_required
     @auth_ns.expect(login_parser)
     @auth_ns.doc(description="Login user")
     @auth_ns.response(200, "Success")
     @auth_ns.response(400, "Bad request", invalid_input_model)
-    @auth_ns.response(403, "Forbidden", no_login_required_model)
+    @auth_ns.response("403 (1)", "Forbidden", no_login_required_model)
+    @auth_ns.response("403 (2)", "Forbidden", email_required_model)
     def post(self):
         args = login_parser.parse_args()
 
         user = get_user_by_login(args["login"])
 
-        if user is None or not user.check_password(args["password"]) or user.email_confirmed is not True:
+        if user is None or not user.check_password(args["password"]):
             raise InvalidInput()
+        elif user.email_confirmed is not True:
+            return marshal({}, email_required_model), 403
         else:
-            login_user(user, remember=args["remember"])
+            login_user(user, remember=args["remember"] or False)
             return {}
+
 
 class Logout(Resource):
     @login_required
@@ -54,6 +57,7 @@ class Logout(Resource):
     def get(self):
         logout_user()
         return {}, 200
+
 
 class Register(Resource):
     @no_login_required
@@ -83,11 +87,12 @@ class Register(Resource):
 
         return {}, 201
 
+
 class ConfirmEmail(Resource):
     @no_login_required
     @auth_ns.expect(email_parser)
     @auth_ns.doc(description="Confirm user email")
-    @auth_ns.response(200, "Success", one_user_model)
+    @auth_ns.response(200, "Success")
     @auth_ns.response(400, "Bad Request", invalid_input_model)
     @auth_ns.response(403, "Forbidden", no_login_required_model)
     @auth_ns.response(404, "Not Found", user_not_found_model)
@@ -110,9 +115,9 @@ class ConfirmEmail(Resource):
             return marshal({"user_id": user_id}, user_not_found_model), 404
 
         try:
-            t = safe.loads(token, salt="email-confirm/email", max_age=60 * 10)
+            safe.loads(token, salt="email-confirm/email", max_age=60 * 10)
             if user.email_confirmed:
-                login_user(user)
+                return marshal({}, no_login_required_model), 403
             elif user.verification_token == token:
                 user.update(verification_token="", email_confirmed=True)
                 login_user(user, remember=True)
@@ -122,7 +127,8 @@ class ConfirmEmail(Resource):
             return marshal({}, token_expired_model), 410
         except BadSignature:
             raise InvalidInput(token="invalid")
-        return redirect(url_for("current_user"))
+        return {}
+
 
 class ResendConfirmEmail(Resource):
     @no_login_required
@@ -132,7 +138,7 @@ class ResendConfirmEmail(Resource):
     @auth_ns.response(400, "Bad Request", validation_model)
     @auth_ns.response(403, "Forbidden", no_login_required_model)
     @auth_ns.response(404, "Not Found", user_not_found_model)
-    def get(self):
+    def post(self):
         json = resend_parser.parse_args()
 
         user = get_user_by_login(json["login"])
@@ -148,69 +154,80 @@ class ResendConfirmEmail(Resource):
         else:
             return marshal({"user_id": json["login"]}, user_not_found_model), 404
 
-# Not Ready
+
 class ForgotPassword(Resource):
-    def get(self):
-        user = get_user_by_login(login)
+    @auth_ns.expect(forgot_parser)
+    @auth_ns.doc(description="Forgot password")
+    @auth_ns.response(200, "Success")
+    @auth_ns.response(400, "Bad Request", validation_model)
+    @auth_ns.response(404, "Not Found", user_not_found_model)
+    def post(self):
+        json = forgot_parser.parse_args()
+
+        user = get_user_by_login(json["login"])
 
         if user is not None:
-            user.verification_token = send_change_password_email(user.email)
-            db.session.commit()
+            token = safe.dumps(user.email, salt="password-change/email")
+            send_change_password_email(user.email, user.id, token)
+            user.update(password_token=token)
         else:
-            message = "user not found"
+            return marshal({"user_id": json["login"]}, user_not_found_model), 404
 
         return {}
 
-# Not Ready
 class ChangePassword(Resource):
-    def get(self):
-        email = ""
-        message = ""
-        data = {}
+    @auth_ns.expect(change_parser)
+    @auth_ns.doc(description="Change password")
+    @auth_ns.response(200, "Success")
+    @auth_ns.response(400, "Bad Request", validation_model)
+    @auth_ns.response(403, "Forbidden", email_required_model)
+    @auth_ns.response(404, "Not Found", user_not_found_model)
+    @auth_ns.response(410, "Expired", token_expired_model)
+    def post(self):
+        args = change_parser.parse_args()
 
-        password = request.json["password"]
-        confirm_password = request.json["confirmPassword"]
+        if current_user.is_authenticated:
+            user_validation(
+                password=args["password"],
+                confirm_password=args["confirm_password"]
+            )
 
-        try:
-            v = validate_email(email)
-            email = v["email"]
-            user = User.query.filter_by(email=email).first()
-            if user is None:
-                message = "user not found"
-        except EmailNotValidError:
-            message = "email is not valid"
+            if not current_user.email_confirmed:
+                return marshal({}, email_required_model), 403
 
-        if message == "":
+            new_password_hash = current_user.set_password(args["password"])
+            current_user.update(password_token="", password_hash=new_password_hash)
+        else:
+            token_args = change_parser_u_t.parse_args()
             try:
-                itsdanger = safe.loads(token, salt="password-change", max_age=60 * 15)
-
-                # Password: 8-units, letters, capitals, numbers
-                if (len(password) < 8
-                        or password.isalpha()
-                        or password.isdigit()
-                        or password.islower()
-                        or password.isupper()):
-                    data.update({"password": False})
-
-                # Confirm Password: must be equal to password
-                if confirm_password != password:
-                    data.update({"confirmPassword": False})
-
-                if user.verification_token == token and len(data) == 0:
-                    user.email_confirmed = True
-                    user.verification_token = ""
-                    user.set_password(password)
-                    db.session.commit()
-                    if not current_user.is_authenticated:
-                        login_user(user, remember=True)
-                else:
-                    if len(data) != 0:
-                        message = "incorrect input"
-                    else:
-                        message = "token is expired"
+                user_id = safe.loads(token_args["user_hash"], salt="password-change/user", max_age=60 * 10)
             except SignatureExpired:
-                message = "token is expired"
+                return marshal({}, token_expired_model), 410
             except BadSignature:
-                message = "token is incorrect"
+                raise InvalidInput(userId="invalid")
+
+            user = User.objects(id=user_id).first()
+            if user is None:
+                return marshal({"user_id": user_id}, user_not_found_model), 404
+
+            user_validation(
+                password=args["password"],
+                confirm_password=args["confirm_password"]
+            )
+
+            try:
+                safe.loads(token_args["token"], salt="password-change/email", max_age=60 * 10)
+                if not user.email_confirmed:
+                    return marshal({}, email_required_model), 403
+                elif user.password_token == token_args["token"]:
+                    new_password_hash = user.set_password(args["password"])
+                    user.update(password_token="", password_hash=new_password_hash)
+                    login_user(user, remember=True)
+                else:
+                    return marshal({}, token_expired_model), 410
+            except SignatureExpired:
+                return marshal({}, token_expired_model), 410
+            except BadSignature:
+                raise InvalidInput(token="invalid")
 
         return {}

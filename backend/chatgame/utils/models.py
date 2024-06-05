@@ -3,7 +3,7 @@ from flask_restx import fields
 from chatgame.extensions import api
 from chatgame.utils.fields import NotFoundField
 
-__all__ = (
+__all__ = [
     "token_expired_model",
     "email_required_model",
     "email_already_confirmed_model",
@@ -16,8 +16,8 @@ __all__ = (
     "one_user_model",
     "many_users_model",
     "users_not_found_model",
-    "user_not_found_model",
-)
+    "user_not_found_model"
+]
 
 token_expired_model = api.model(
     "Token Expired",
@@ -84,7 +84,7 @@ user_model = api.model(
     "User model",
     {
         "id": fields.String,
-        "userName": fields.String,
+        "username": fields.String,
         "email": fields.String,
         "emailConfirmed": fields.Boolean,
         "admin": fields.Boolean

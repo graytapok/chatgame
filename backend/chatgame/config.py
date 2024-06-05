@@ -1,26 +1,37 @@
 from dotenv import load_dotenv
+
 import os
 
 load_dotenv(".env")
 
+class EnvironmentalVariable(Exception):
+    pass
+
+def check_env_var(var):
+    os_var = os.getenv(var)
+    if os_var is None:
+        raise EnvironmentalVariable(f"environmental variable '{var}' not found")
+    return os_var
+
 class Config:
     # Flask
-    FLASK_APP = "app"
-    SECRET_KEY = os.getenv('SECRET_KEY')
+    SECRET_KEY = check_env_var('SECRET_KEY')
     BUNDLE_ERRORS = True
-    DOMAIN = os.getenv("DOMAIN")
+    DOMAIN = check_env_var("DOMAIN")
 
     # Flask Mongoengine
     MONGODB_SETTINGS = [{
-        "host": os.getenv("MONGODB_URI"),
+        "host": check_env_var("MONGODB_HOST"),
+        "db": check_env_var("MONGODB_DB")
     }]
 
     # Flask Mail
     MAIL_DEBUG = False
-    MAIL_SERVER = "smtp.gmail.com"
+    MAIL_SERVER = check_env_var("MAIL_SMTP_SERVER")
     MAIL_PORT = 465
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+    MAIL_USERNAME = check_env_var("MAIL_USERNAME")
+    MAIL_PASSWORD = check_env_var("MAIL_PASSWORD")
+    MAIL_IMAP_SERVER = check_env_var("MAIL_IMAP_SERVER")
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
 
@@ -28,5 +39,15 @@ class Config:
     SESSION_TYPE = "mongodb"
     SESSION_PERMANENT = False
     SESSION_USER_SIGNER = True
-    SESSION_MONGODB_DB = "chatgame"  # Database
+    SESSION_MONGODB_DB = check_env_var("MONGODB_DB")  # Database
     SESSION_COOKIE_SECURE = True
+
+class TestConfig(Config):
+    TEST = True
+
+    MONGODB_SETTINGS = [{
+        "host": check_env_var("MONGODB_HOST"),
+        "db": f"{check_env_var('MONGODB_DB')}_test"
+    }]
+
+    SESSION_MONGODB_DB = f"{check_env_var('MONGODB_DB')}_test"

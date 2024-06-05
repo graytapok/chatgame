@@ -1,3 +1,13 @@
+__all__ = [
+    "BadException",
+    "LoginRequired",
+    "NoLoginRequired",
+    "EmailConfirmationRequired",
+    "NotValidJson",
+    "InvalidInput",
+    "ValidationError"
+]
+
 class BadException(Exception):
     def __init__(self, *args):
         self.list = []
@@ -18,6 +28,10 @@ class EmailConfirmationRequired(Exception):
 class InvalidInput(Exception):
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
+
+class NotValidJson(Exception):
+    def __init__(self, arg):
+        self.arg = arg
 
 class ValidationError(Exception):
     def __init__(self, message=None, field_name=None, errors=None):

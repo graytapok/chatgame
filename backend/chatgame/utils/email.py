@@ -5,6 +5,8 @@ from threading import Thread
 
 from chatgame.extensions import mail, safe
 
+__all__ = ["send_registration_email", "send_change_password_email"]
+
 def send_email(app, msg):
     with app.app_context():
         mail.send(msg)
@@ -12,13 +14,13 @@ def send_email(app, msg):
 def send_registration_email(email, user_id: str, token):
     user_hash = safe.dumps(str(user_id), salt="email-confirm/user")
     msg = Message(
-        subject="Registration - Soccher",
+        subject="Registration - Chatgame",
         sender=current_app.config["MAIL_USERNAME"],
         recipients=[email]
     )
     msg.html = render_template(
         "auth/register_email.html",
-        link=f"{current_app.config['DOMAIN']}/confirm_email?u={user_hash}&t={token}"
+        link=f"{current_app.config['DOMAIN']}/register?u={user_hash}&t={token}"
     )
 
     Thread(
@@ -27,16 +29,16 @@ def send_registration_email(email, user_id: str, token):
     ).start()
 
 
-def send_change_password_email(email, user_id, token):
-    user_hash = safe.dumps(user_id, salt="password-change/user_id")
+def send_change_password_email(email, user_id: str, token):
+    user_hash = safe.dumps(str(user_id), salt="password-change/user")
     msg = Message(
-        subject="Password Change - Soccher",
+        subject="Password Change - Chatgame",
         sender=current_app.config["MAIL_USERNAME"],
         recipients=[email]
     )
     msg.html = render_template(
         "auth/password_email.html",
-        link=f"{current_app.config['DOMAIN']}/change_password?u={user_hash}?t={token}"
+        link=f"{current_app.config['DOMAIN']}/forgot_password?u={user_hash}&t={token}"
     )
 
     Thread(
