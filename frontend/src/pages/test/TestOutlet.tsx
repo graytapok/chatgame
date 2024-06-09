@@ -1,11 +1,8 @@
 import { Heading, SegmentedControl } from "@radix-ui/themes";
-import { Outlet, useNavigate, useParams } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 
 function TestOutlet() {
   const navigate = useNavigate();
-  const params = useParams();
-
-  console.log(params);
   return (
     <>
       <Heading size="7" className="mt-3 ml-3">

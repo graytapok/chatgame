@@ -13,7 +13,7 @@ const Navbar = () => {
       top="0"
       position="absolute"
       height="64px"
-      className=" w-full justify-center bg-white dark:bg-primary shadow-lg"
+      className="w-full justify-center bg-white dark:bg-primary shadow-lg"
     >
       <Flex
         justify="between"

@@ -14,35 +14,35 @@ import TestRoutes from "src/pages/test";
 import AuthContext from "./AuthProvider";
 
 interface ProtectedRouteProps extends PropsWithChildren {
-  loginRequired: boolean;
+  loginRequired?: boolean;
   adminRequired?: boolean;
 }
 
 export const ProtectedRoute = ({
-  loginRequired = false,
+  loginRequired = true,
   adminRequired,
   children,
 }: ProtectedRouteProps) => {
-  const { user } = useContext(AuthContext) as AuthContext;
+  const { user, query } = useContext(AuthContext) as AuthContext;
   const [navigate, setNavigate] = useState(false);
 
   useEffect(() => {
-    if (loginRequired && user === null) {
-      toast.error("You must be logged in to access this page!");
-      setNavigate(true);
+    if (query.isError || (query.isSuccess && user)) {
+      if (adminRequired && !user?.admin) {
+        setNavigate(true);
+      } else if (loginRequired && user === null) {
+        toast.error("You must be logged in to access this page!", {
+          toastId: "providerMessage",
+        });
+        setNavigate(true);
+      } else if (!loginRequired && user) {
+        toast.error("You must be not logged in to access this page!", {
+          toastId: "providerMessage",
+        });
+        setNavigate(true);
+      }
     }
-
-    if (!loginRequired && user) {
-      console.log("aa");
-      toast.error("You must be not logged in to access this page!");
-      setNavigate(true);
-    }
-
-    if (adminRequired && !user?.admin) {
-      toast.error("You must be an admin to access this page!");
-      setNavigate(true);
-    }
-  }, [user]);
+  }, [user, query]);
 
   return navigate ? <Navigate to="/" /> : children;
 };
@@ -54,7 +54,7 @@ const router = createBrowserRouter(
       <Route
         path="/test/*"
         element={
-          <ProtectedRoute adminRequired={true} loginRequired={true}>
+          <ProtectedRoute adminRequired={true}>
             <TestRoutes />
           </ProtectedRoute>
         }
@@ -63,6 +63,4 @@ const router = createBrowserRouter(
   )
 );
 
-export const RoutingProvider = () => {
-  return <RouterProvider router={router} />;
-};
+export const RoutingProvider = () => <RouterProvider router={router} />;

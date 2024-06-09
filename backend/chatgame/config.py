@@ -28,7 +28,7 @@ class Config:
     # Flask Mail
     MAIL_DEBUG = False
     MAIL_SERVER = check_env_var("MAIL_SMTP_SERVER")
-    MAIL_PORT = 465
+    MAIL_PORT = check_env_var("MAIL_SMTP_PORT")
     MAIL_USERNAME = check_env_var("MAIL_USERNAME")
     MAIL_PASSWORD = check_env_var("MAIL_PASSWORD")
     MAIL_IMAP_SERVER = check_env_var("MAIL_IMAP_SERVER")

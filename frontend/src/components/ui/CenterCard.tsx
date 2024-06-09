@@ -15,9 +15,9 @@ function CenterCard({ width, children, className, heading }: Props) {
       position="relative"
     >
       <Card
-        className={`flex flex-col w-[${
-          width ? width : "500px"
-        }] gap-3 pt-10 pb-16 px-10 ${className ? className : ""}`}
+        className={`w-[${
+          width || "500px"
+        }] flex flex-col gap-3 pt-10 pb-16 px-10 ${className}`}
       >
         <Heading size="7" className="text-center mb-4">
           {heading}

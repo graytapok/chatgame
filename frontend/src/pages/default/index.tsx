@@ -25,7 +25,7 @@ function DefaultRoutes() {
         <Route
           path="/logout"
           element={
-            <ProtectedRoute loginRequired={true}>
+            <ProtectedRoute>
               <Logout />
             </ProtectedRoute>
           }
