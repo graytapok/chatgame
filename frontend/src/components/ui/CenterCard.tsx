@@ -2,12 +2,11 @@ import { Card, Flex, Heading } from "@radix-ui/themes";
 import { PropsWithChildren } from "react";
 
 interface Props extends PropsWithChildren {
-  width?: string;
   className?: string;
   heading: string;
 }
 
-function CenterCard({ width, children, className, heading }: Props) {
+function CenterCard({ children, className, heading }: Props) {
   return (
     <Flex
       justify="center"
@@ -15,9 +14,9 @@ function CenterCard({ width, children, className, heading }: Props) {
       position="relative"
     >
       <Card
-        className={`w-[${
-          width || "500px"
-        }] flex flex-col gap-3 pt-10 pb-16 px-10 ${className}`}
+        className={`w-[500px] flex flex-col gap-3 pt-10 pb-16 px-10 ${
+          className || ""
+        }`}
       >
         <Heading size="7" className="text-center mb-4">
           {heading}
