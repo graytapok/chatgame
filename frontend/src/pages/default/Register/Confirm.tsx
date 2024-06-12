@@ -44,10 +44,7 @@ function RegisterConfirm() {
   }, [fetchConfirm, error]);
 
   return (
-    <CenterCard
-      width="500px"
-      heading={error ? "Something went wrong!" : "Done!"}
-    >
+    <CenterCard heading={error ? "Something went wrong!" : "Done!"}>
       <Blockquote size="5">
         {error
           ? errorMessage
