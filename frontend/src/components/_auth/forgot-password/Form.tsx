@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
-import { InfoCircledIcon, PersonIcon } from "@radix-ui/react-icons";
-import { Blockquote, Callout, TextField } from "@radix-ui/themes";
+import { useNavigate } from "react-router-dom";
+import { Blockquote, Callout, IconButton, TextField } from "@radix-ui/themes";
+import {
+  ArrowLeftIcon,
+  InfoCircledIcon,
+  PersonIcon,
+} from "@radix-ui/react-icons";
 
 import { useForgotPassword } from "src/api/auth/useForgotPassword";
 import CenterCard from "src/components/ui/CenterCard";
@@ -10,6 +15,8 @@ function ForgotPassword() {
   const fetchForgotPassword = useForgotPassword();
   const [login, setLogin] = useState("");
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (fetchForgotPassword.isSuccess) {
       setLogin("");
@@ -18,6 +25,14 @@ function ForgotPassword() {
 
   return (
     <CenterCard heading="Forgot Password">
+      <IconButton
+        variant="ghost"
+        radius="full"
+        className="absolute cursor-pointer"
+        onClick={() => navigate("/login")}
+      >
+        <ArrowLeftIcon width="22" height="22" />
+      </IconButton>
       <Blockquote>
         Enter your username or email to reset your password and get a password
         change email.

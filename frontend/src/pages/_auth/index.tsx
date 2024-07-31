@@ -1,19 +1,16 @@
 import { Route, Routes } from "react-router-dom";
 
-import { ProtectedRoute } from "src/providers";
-
+import ProtectedRoute from "src/components/ProtectedRoute";
+import ForgotPassword from "./ForgotPassword";
 import Register from "./Register";
 import Logout from "./Logout";
-import Login from "./Login";
 import Resend from "./Resend";
-import ForgotPassword from "./ForgotPassword";
+import Login from "./Login";
 
-function DefaultRoutes() {
+const AuthRoutes = () => {
   return (
     <Routes>
       <Route>
-        <Route index element={<p>Home</p>} />
-        <Route path="/about" element={<p>About</p>} />
         <Route
           path="/login"
           element={
@@ -40,10 +37,9 @@ function DefaultRoutes() {
           }
         />
         <Route path="/forgot_password" element={<ForgotPassword />} />
-        <Route path="*" element={<p>Not Found</p>} />
       </Route>
     </Routes>
   );
-}
+};
 
-export default DefaultRoutes;
+export default AuthRoutes;

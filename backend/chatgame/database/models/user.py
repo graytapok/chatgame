@@ -1,5 +1,6 @@
 from flask_login import UserMixin
 
+from mongoengine import ReferenceField
 from email_validator import validate_email
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -119,7 +120,6 @@ class User(db.Document, UserMixin):
 
         if len(errors) > 0:
             raise ValidationError("validation error", errors=errors)
-
 
 @login.user_loader
 def load_user(user_id):
