@@ -4,11 +4,16 @@ from flask_login import FlaskLoginClient
 
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from .config import Config, TestConfig
-from .extensions import *
-from .database import *
+from chatgame.config import Config, TestConfig
+from chatgame.extensions import *
+from chatgame.database import *
 
 import os
+
+__all__ = [
+    "create_app",
+    "Config"
+]
 
 def create_app(test: bool = False):
     ConfigClass = TestConfig if test else Config
@@ -33,13 +38,19 @@ def create_app(test: bool = False):
     sess.init_app(app)
     mail.init_app(app)
     login.init_app(app)
+    socketio.init_app(app)
 
-    from . import namespaces
+    from chatgame import namespaces
 
     app.register_blueprint(namespaces.errors_bp)
 
     api.add_namespace(namespaces.errors_ns)
     api.add_namespace(namespaces.auth_ns, path="/auth")
+
+    from chatgame.sockets import Chat, TicTacToe
+
+    socketio.on_namespace(Chat(namespace="/chat"))
+    socketio.on_namespace(TicTacToe(namespace="/tictactoe"))
 
     @app.shell_context_processor
     def shell():

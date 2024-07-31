@@ -1,11 +1,11 @@
 import { useState, createContext, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import RegisterConfirm from "./Confirm";
-import RegisterForm from "./Form";
+import RegisterConfirm from "src/components/_auth/register/ConfirmPage";
+import RegisterForm from "src/components/_auth/register/Form";
 
 import { useConfirmRegister } from "src/api/auth";
-import { ProtectedRoute } from "src/providers";
+import ProtectedRoute from "src/components/ProtectedRoute";
 
 export const RegisterContext = createContext<ReturnType<
   typeof useConfirmRegister

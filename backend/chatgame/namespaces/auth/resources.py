@@ -3,7 +3,7 @@ from flask_login import login_user, current_user, logout_user
 
 from itsdangerous import BadSignature, SignatureExpired
 
-from chatgame.extensions import safe
+from chatgame.extensions import safe_t
 from chatgame.utils.email import *
 from chatgame.utils.funcs import get_user_by_login
 from chatgame.utils.errors import InvalidInput
@@ -76,12 +76,15 @@ class Register(Resource):
             confirm_password=json["confirm_password"],
         )
 
-        token = safe.dumps(json["email"], salt="email-confirm/email")
+        token = safe_t.dumps(json["email"], salt="email-confirm/email")
 
-        user = User(username=json["username"], email=json["email"])
+        user = User(
+            username=json["username"],
+            email=json["email"],
+            verification_token=token,
+        )
         user.set_password(json["password"])
-        user.verification_token = token
-        user.save(user)
+        user.save()
 
         send_registration_email(user.email, user.id, user.verification_token)
 
@@ -104,7 +107,7 @@ class ConfirmEmail(Resource):
         token = args["token"]
 
         try:
-            user_id = safe.loads(user_hash, salt="email-confirm/user", max_age=60 * 10)
+            user_id = safe_t.loads(user_hash, salt="email-confirm/user", max_age=60 * 10)
         except SignatureExpired:
             return marshal({}, token_expired_model), 410
         except BadSignature:
@@ -115,7 +118,7 @@ class ConfirmEmail(Resource):
             return marshal({"user_id": user_id}, user_not_found_model), 404
 
         try:
-            safe.loads(token, salt="email-confirm/email", max_age=60 * 10)
+            safe_t.loads(token, salt="email-confirm/email", max_age=60 * 10)
             if user.email_confirmed:
                 return marshal({}, no_login_required_model), 403
             elif user.verification_token == token:
@@ -147,7 +150,7 @@ class ResendConfirmEmail(Resource):
             if user.email_confirmed:
                 return marshal({}, email_already_confirmed_model), 403
             else:
-                token = safe.dumps(user.email, salt="email-confirm/email")
+                token = safe_t.dumps(user.email, salt="email-confirm/email")
                 user.update(verification_token=token)
                 send_registration_email(user.email, user.id, token)
                 return {}, 200
@@ -167,7 +170,7 @@ class ForgotPassword(Resource):
         user = get_user_by_login(json["login"])
 
         if user is not None:
-            token = safe.dumps(user.email, salt="password-change/email")
+            token = safe_t.dumps(user.email, salt="password-change/email")
             send_change_password_email(user.email, user.id, token)
             user.update(password_token=token)
         else:
@@ -200,7 +203,7 @@ class ChangePassword(Resource):
         else:
             token_args = change_parser_u_t.parse_args()
             try:
-                user_id = safe.loads(token_args["user_hash"], salt="password-change/user", max_age=60 * 10)
+                user_id = safe_t.loads(token_args["user_hash"], salt="password-change/user", max_age=60 * 10)
             except SignatureExpired:
                 return marshal({}, token_expired_model), 410
             except BadSignature:
@@ -216,7 +219,7 @@ class ChangePassword(Resource):
             )
 
             try:
-                safe.loads(token_args["token"], salt="password-change/email", max_age=60 * 10)
+                safe_t.loads(token_args["token"], salt="password-change/email", max_age=60 * 10)
                 if not user.email_confirmed:
                     return marshal({}, email_required_model), 403
                 elif user.password_token == token_args["token"]:

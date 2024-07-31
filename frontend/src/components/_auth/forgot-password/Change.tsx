@@ -19,7 +19,7 @@ import {
 import CenterCard from "src/components/ui/CenterCard";
 import { useChangePassword } from "src/api/auth";
 import Button from "src/components/ui/Button";
-import { ForgotPasswordContext } from ".";
+import { ForgotPasswordContext } from "src/pages/_auth/ForgotPassword";
 
 interface ErrorResponse {
   message: string;

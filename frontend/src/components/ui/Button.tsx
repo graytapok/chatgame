@@ -12,6 +12,7 @@ interface ButtonProps extends PropsWithChildren {
   className?: string;
   disabled?: boolean;
   color?: ThemeColor;
+  id?: string;
   onClick?: (...args: any[]) => void;
 }
 
@@ -26,6 +27,7 @@ function Button({
   size,
   variant,
   radius,
+  id,
 }: ButtonProps) {
   return (
     <TButton
@@ -38,6 +40,7 @@ function Button({
       disabled={disabled}
       loading={loading}
       color={color || undefined}
+      id={id}
     >
       {children}
     </TButton>

@@ -1,20 +1,14 @@
-import { Outlet } from "react-router-dom";
-
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import { Box, Flex } from "@radix-ui/themes";
+import Main from "./Main";
 
 function AppLayout() {
   return (
-    <>
+    <div className="grid h-screen grid-rows-[1fr_auto]">
       <Navbar />
-      <Flex className="justify-center w-full h-[100vh] py-[70px]">
-        <Box width="screen" className="m-0 max-w-screen-xl w-full h-full">
-          <Outlet />
-        </Box>
-      </Flex>
+      <Main />
       <Footer />
-    </>
+    </div>
   );
 }
 

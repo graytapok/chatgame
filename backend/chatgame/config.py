@@ -19,6 +19,10 @@ class Config:
     BUNDLE_ERRORS = True
     DOMAIN = check_env_var("DOMAIN")
 
+    # ItsDangerous
+    ITSDANGEROUS_SECRET_KEY = check_env_var('ITSDANGEROUS_SECRET_KEY')
+    ITSDANGEROUS_TIMED_SECRET_KEY = check_env_var('ITSDANGEROUS_TIMED_SECRET_KEY')
+
     # Flask Mongoengine
     MONGODB_SETTINGS = [{
         "host": check_env_var("MONGODB_HOST"),

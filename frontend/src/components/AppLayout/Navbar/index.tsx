@@ -7,14 +7,7 @@ import "./index.css";
 
 const Navbar = () => {
   return (
-    <Flex
-      width="screen"
-      justify="center"
-      top="0"
-      position="absolute"
-      height="64px"
-      className="w-full justify-center bg-white dark:bg-primary shadow-lg"
-    >
+    <Flex className="h-16 justify-center bg-white dark:bg-neutral-800 shadow-lg fixed w-full">
       <Flex
         justify="between"
         width="screen"

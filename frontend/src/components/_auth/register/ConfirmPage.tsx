@@ -6,9 +6,9 @@ import { Blockquote } from "@radix-ui/themes";
 
 import CenterCard from "src/components/ui/CenterCard";
 import Button from "src/components/ui/Button";
-import { RegisterContext } from ".";
+import { RegisterContext } from "src/pages/_auth/Register";
 
-function RegisterConfirm() {
+function ConfirmRegister() {
   const fetchConfirm = useContext(RegisterContext);
   const navigate = useNavigate();
 
@@ -70,4 +70,4 @@ function RegisterConfirm() {
   );
 }
 
-export default RegisterConfirm;
+export default ConfirmRegister;

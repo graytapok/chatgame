@@ -8,7 +8,6 @@ function Logout() {
   const query = useLogout();
 
   useEffect(() => {
-    console.log(query.status);
     if (query.status === "idle") {
       query.mutate();
     }

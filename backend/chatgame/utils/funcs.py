@@ -1,9 +1,14 @@
+from flask_socketio import emit
+
 from email_validator import validate_email, EmailNotValidError
 from chatgame.database.models import User
 
-__all__ = (
-    "get_user_by_login",
-)
+from json import JSONDecodeError
+import json
+
+__all__ = [
+    "get_user_by_login"
+]
 
 def get_user_by_login(login) -> User:
     try:

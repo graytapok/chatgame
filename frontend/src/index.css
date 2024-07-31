@@ -5,10 +5,6 @@
 
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
-
-body {
-    min-height: 100vh;
-  }
   
 .radix-themes {
     --default-font-family: "Segoe UI";

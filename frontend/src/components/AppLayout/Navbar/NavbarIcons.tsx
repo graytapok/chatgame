@@ -7,8 +7,8 @@ import { FaSun, FaMoon } from "react-icons/fa";
 import { Flex, IconButton, Separator, AlertDialog } from "@radix-ui/themes";
 
 import DarkmodeContext from "src/providers/ThemeProvider";
-import { useAuth } from "src/api/auth";
 import Button from "src/components/ui/Button";
+import AuthContext from "src/providers/AuthProvider";
 
 const NavbarIcons = () => {
   const [darkTheme, setDarkTheme] = useContext(
@@ -16,7 +16,7 @@ const NavbarIcons = () => {
   ) as DarkmodeContext;
   const navigate = useNavigate();
 
-  const { user } = useAuth();
+  const { user } = useContext(AuthContext) as AuthContext;
 
   return (
     <Flex
@@ -47,35 +47,44 @@ const NavbarIcons = () => {
       {user ? (
         <AlertDialog.Root>
           <AlertDialog.Trigger>
-            <NavbarIcon text="Logout" color="red">
-              {user ? <FiLogOut size="24" /> : <FiLogIn size="24" />}
-            </NavbarIcon>
+            <div>
+              <NavbarIcon text="Logout" color="red">
+                {user ? <FiLogOut size="24" /> : <FiLogIn size="24" />}
+              </NavbarIcon>
+            </div>
           </AlertDialog.Trigger>
+
           <AlertDialog.Content maxWidth="450px">
             <AlertDialog.Title>Logout</AlertDialog.Title>
+
             <AlertDialog.Description size="2">
               Are you sure you want to logout?
             </AlertDialog.Description>
 
             <Flex gap="3" mt="4" justify="end">
               <AlertDialog.Cancel>
-                <Button
-                  variant="soft"
-                  color="gray"
-                  className="hover:cursor-pointer"
-                >
-                  Cancel
-                </Button>
+                <div>
+                  <Button
+                    variant="soft"
+                    color="gray"
+                    className="hover:cursor-pointer"
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </AlertDialog.Cancel>
+
               <AlertDialog.Action>
-                <Button
-                  variant="solid"
-                  color="red"
-                  onClick={() => navigate("/logout")}
-                  className="hover:cursor-pointer"
-                >
-                  Logout
-                </Button>
+                <div>
+                  <Button
+                    variant="solid"
+                    color="red"
+                    onClick={() => navigate("/logout")}
+                    className="hover:cursor-pointer"
+                  >
+                    Logout
+                  </Button>
+                </div>
               </AlertDialog.Action>
             </Flex>
           </AlertDialog.Content>

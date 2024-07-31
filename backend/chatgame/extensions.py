@@ -1,16 +1,19 @@
-from itsdangerous import URLSafeTimedSerializer
+from itsdangerous import URLSafeTimedSerializer, URLSafeSerializer
 from flask_mongoengine import MongoEngine
 from flask_marshmallow import Marshmallow
 from flask_login import LoginManager
+from flask_socketio import SocketIO
 from flask_session import Session
 from flask_restx import Api
 from flask_mail import Mail
 
 from chatgame.config import Config
 
-__all__ = ["db", "ma", "sess", "login", "api", "mail", "safe"]
+__all__ = ["db", "ma", "sess", "login", "api", "mail", "safe", "safe_t", "socketio"]
 
-safe = URLSafeTimedSerializer(Config.SECRET_KEY)
+socketio = SocketIO(cors_allowed_origins="*", manage_session=False, logger=False)
+safe_t = URLSafeTimedSerializer(Config.SECRET_KEY)
+safe = URLSafeSerializer(Config.SECRET_KEY)
 login = LoginManager()
 ma = Marshmallow()
 db = MongoEngine()

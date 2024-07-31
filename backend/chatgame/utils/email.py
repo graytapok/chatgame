@@ -3,7 +3,7 @@ from flask_mail import Message
 
 from threading import Thread
 
-from chatgame.extensions import mail, safe
+from chatgame.extensions import mail, safe_t
 
 __all__ = ["send_registration_email", "send_change_password_email"]
 
@@ -12,7 +12,7 @@ def send_email(app, msg):
         mail.send(msg)
 
 def send_registration_email(email, user_id: str, token):
-    user_hash = safe.dumps(str(user_id), salt="email-confirm/user")
+    user_hash = safe_t.dumps(str(user_id), salt="email-confirm/user")
     msg = Message(
         subject="Registration - Chatgame",
         sender=current_app.config["MAIL_USERNAME"],
@@ -30,7 +30,7 @@ def send_registration_email(email, user_id: str, token):
 
 
 def send_change_password_email(email, user_id: str, token):
-    user_hash = safe.dumps(str(user_id), salt="password-change/user")
+    user_hash = safe_t.dumps(str(user_id), salt="password-change/user")
     msg = Message(
         subject="Password Change - Chatgame",
         sender=current_app.config["MAIL_USERNAME"],

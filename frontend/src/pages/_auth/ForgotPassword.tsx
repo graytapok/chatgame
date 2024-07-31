@@ -1,10 +1,10 @@
 import { useSearchParams } from "react-router-dom";
 import { createContext, Dispatch, useEffect, useState } from "react";
 
-import { ProtectedRoute } from "src/providers";
-import Success from "./Success";
-import Change from "./Change";
-import Form from "./Form";
+import ProtectedRoute from "src/components/ProtectedRoute";
+import Success from "src/components/_auth/forgot-password/Success";
+import Change from "src/components/_auth/forgot-password/Change";
+import Form from "src/components/_auth/forgot-password/Form";
 
 export const ForgotPasswordContext = createContext<Dispatch<
   React.SetStateAction<string>
