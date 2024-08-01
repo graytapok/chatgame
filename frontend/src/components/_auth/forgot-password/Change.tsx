@@ -16,9 +16,9 @@ import {
   LockOpen1Icon,
 } from "@radix-ui/react-icons";
 
-import CenterCard from "src/components/ui/CenterCard";
-import { useChangePassword } from "src/api/auth";
 import Button from "src/components/ui/Button";
+import { useChangePassword } from "src/api/auth";
+import CenterCard from "src/components/ui/CenterCard";
 import { ForgotPasswordContext } from "src/pages/_auth/ForgotPassword";
 
 interface ErrorResponse {

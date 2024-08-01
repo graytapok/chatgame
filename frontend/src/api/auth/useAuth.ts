@@ -1,35 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 
 import { apiClient } from "src/api";
-import { User } from "src/types/auth";
+import { login, logout } from "src/features/userSlice";
+import { store } from "src/store";
 
 const getAuth = async () => {
-  const response = await apiClient.get("/auth/");
-  return response.data;
+  const response = await apiClient
+    .get("/auth/")
+    .catch(() => store.dispatch(logout()));
+
+  if ("data" in response) {
+    store.dispatch(login(response.data.user));
+    return response.data;
+  }
 };
 
-interface UseAuthProps {
-  enabled: boolean;
-}
-
-export const useAuth = ({ enabled = true }: Partial<UseAuthProps> = {}) => {
-  const [user, setUser] = useState<User | null>(null);
-  const query = useQuery({
+export const useAuth = () => {
+  return useQuery({
     queryKey: ["auth"],
     queryFn: getAuth,
     retry: false,
+    enabled: true,
     retryDelay: 0,
-    enabled: enabled,
   });
-
-  useEffect(() => {
-    if (query.isSuccess) {
-      setUser(query.data.user);
-    } else {
-      setUser(null);
-    }
-  }, [user, query]);
-
-  return { query, user };
 };

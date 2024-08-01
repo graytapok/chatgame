@@ -1,8 +1,8 @@
 import { toast } from "react-toastify";
 import { Navigate } from "react-router-dom";
-import { PropsWithChildren, useEffect, useState, useContext } from "react";
+import { PropsWithChildren } from "react";
 
-import AuthContext from "src/providers/AuthProvider";
+import { useAppSelector } from "src/hooks";
 
 interface ProtectedRouteProps extends PropsWithChildren {
   loginRequired?: boolean;
@@ -14,28 +14,23 @@ const ProtectedRoute = ({
   adminRequired,
   children,
 }: ProtectedRouteProps) => {
-  const { user, query } = useContext(AuthContext) as AuthContext;
-  const [navigate, setNavigate] = useState(false);
+  const user = useAppSelector((state) => state.user);
 
-  useEffect(() => {
-    if (query.isError || (query.isSuccess && user)) {
-      if (adminRequired && !user?.admin) {
-        setNavigate(true);
-      } else if (loginRequired && user === null) {
-        toast.error("You must be logged in to access this page!", {
-          toastId: "providerMessage",
-        });
-        setNavigate(true);
-      } else if (!loginRequired && user) {
-        toast.error("You must be not logged in to access this page!", {
-          toastId: "providerMessage",
-        });
-        setNavigate(true);
-      }
-    }
-  }, [user, query]);
+  if (adminRequired && !user.admin) {
+    return <Navigate to="/" />;
+  } else if (loginRequired && !user.authenticated) {
+    toast.error("You must be logged in to access this page!", {
+      toastId: "providerMessage",
+    });
+    return <Navigate to="/" />;
+  } else if (!loginRequired && user.authenticated) {
+    toast.error("You must be not logged in to access this page!", {
+      toastId: "providerMessage",
+    });
+    return <Navigate to="/" />;
+  }
 
-  return navigate ? <Navigate to="/" /> : children;
+  return children;
 };
 
 export default ProtectedRoute;

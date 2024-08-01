@@ -8,7 +8,7 @@ import { Flex, IconButton, Separator, AlertDialog } from "@radix-ui/themes";
 
 import DarkmodeContext from "src/providers/ThemeProvider";
 import Button from "src/components/ui/Button";
-import AuthContext from "src/providers/AuthProvider";
+import { useAppSelector } from "src/hooks";
 
 const NavbarIcons = () => {
   const [darkTheme, setDarkTheme] = useContext(
@@ -16,7 +16,7 @@ const NavbarIcons = () => {
   ) as DarkmodeContext;
   const navigate = useNavigate();
 
-  const { user } = useContext(AuthContext) as AuthContext;
+  const user = useAppSelector((state) => state.user);
 
   return (
     <Flex
@@ -44,12 +44,12 @@ const NavbarIcons = () => {
 
       <Separator orientation="vertical" size="2" />
 
-      {user ? (
+      {user.authenticated ? (
         <AlertDialog.Root>
           <AlertDialog.Trigger>
             <div>
               <NavbarIcon text="Logout" color="red">
-                {user ? <FiLogOut size="24" /> : <FiLogIn size="24" />}
+                <FiLogOut size="24" />
               </NavbarIcon>
             </div>
           </AlertDialog.Trigger>
@@ -91,7 +91,7 @@ const NavbarIcons = () => {
         </AlertDialog.Root>
       ) : (
         <NavbarIcon onClick={() => navigate("/login")} text="Login">
-          {user ? <FiLogOut size="24" /> : <FiLogIn size="24" />}
+          <FiLogIn size="24" />
         </NavbarIcon>
       )}
     </Flex>

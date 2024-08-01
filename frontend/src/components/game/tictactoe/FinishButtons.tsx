@@ -1,31 +1,28 @@
 import { ReloadIcon, ResetIcon } from "@radix-ui/react-icons";
-import { Flex } from "@radix-ui/themes";
 import { useNavigate } from "react-router-dom";
+import { Flex } from "@radix-ui/themes";
 
 import Button from "src/components/ui/Button";
+import { useAppDispatch, useAppSelector } from "src/hooks";
+import { nextGame } from "src/features/tictactoeSlice";
 
 interface Props {
-  gameStatus?: string;
-
-  setNextGame: React.Dispatch<React.SetStateAction<number>>;
   setFields: React.Dispatch<React.SetStateAction<JSX.Element[]>>;
-  reset: () => void;
-
-  opponentLeft?: boolean;
 }
 
-const FinishButtons = (p: Props) => {
+const FinishButtons = ({ setFields }: Props) => {
+  const { gameStatus } = useAppSelector((state) => state.tictactoe);
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const handleNextGame = () => {
-    p.setNextGame((prev) => prev + 1);
-    p.setFields([]);
-    p.reset();
+    dispatch(nextGame());
+    setFields([]);
   };
 
   return (
     <Flex className="items-center justify-center m-5 gap-3">
-      {p.gameStatus === "finished" && (
+      {gameStatus === "finished" && (
         <>
           <Button onClick={() => navigate("/game")} color="red">
             <ResetIcon />

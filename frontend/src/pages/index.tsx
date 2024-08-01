@@ -2,11 +2,11 @@ import { Route, Routes } from "react-router-dom";
 
 import AppLayout from "src/components/AppLayout";
 
-import AuthRoutes from "./_auth";
+import Home from "./Home";
+import About from "./About";
 import GameRoutes from "./game";
 import TestRoutes from "./test";
-import About from "./About";
-import Home from "./Home";
+import AuthRoutes from "./_auth";
 
 const AppRoutes = () => (
   <Routes>
