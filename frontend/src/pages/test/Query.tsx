@@ -1,3 +1,6 @@
+import { CopyIcon, CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
+import { toast } from "react-toastify";
+import { FC } from "react";
 import {
   Flex,
   DataList,
@@ -6,18 +9,15 @@ import {
   IconButton,
   Link,
 } from "@radix-ui/themes";
-import { CopyIcon, CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
-import { FC, useContext } from "react";
-import { toast } from "react-toastify";
 
 import { useLogout, useLogin } from "src/api/auth";
-import AuthContext from "src/providers/AuthProvider";
 import Button from "src/components/ui/Button";
+import { useAppSelector } from "src/hooks";
 
 const HelloIcon: FC = () => "👋";
 
 function TestQueryButtons() {
-  const { user } = useContext(AuthContext) as AuthContext;
+  const user = useAppSelector((state) => state.user);
   const login = useLogin();
   const logout = useLogout();
 
@@ -42,11 +42,11 @@ function TestQueryButtons() {
                 password: "Wadim2204!",
                 remember: true,
               })
-              .catch((e) =>
-                toast.error(e.response.data.message, {
+              .catch(() => {
+                toast.error("No login required", {
                   toastId: "loginError",
-                })
-              )
+                });
+              })
           }
         >
           Login
@@ -64,7 +64,7 @@ function TestQueryButtons() {
         </Button>
       </Flex>
 
-      {user && (
+      {user.authenticated && (
         <DataList.Root className="m-3">
           <DataList.Item align="center">
             <DataList.Label minWidth="88px">Status</DataList.Label>

@@ -15,13 +15,13 @@ const postLogin = async (loginData: FetchLoginProps) => {
 };
 
 export const useLogin = () => {
-  const queryClient = useQueryClient()
-    return useMutation({
-        mutationFn: postLogin,
-        mutationKey: ["auth", "login"],
-        onSuccess: () => {
-          queryClient.invalidateQueries({queryKey: ["auth"], exact: true})
-          toast.success("Logged in!", { toastId: "loginSuccessMessage" });
-        }
-    })
-}
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: postLogin,
+    mutationKey: ["auth", "login"],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["auth"], exact: true });
+      toast.success("Logged in!", { toastId: "loginSuccessMessage" });
+    },
+  });
+};

@@ -1,7 +1,7 @@
 import { Slide, ToastContainer } from "react-toastify";
+import { useContext } from "react";
 
 import DarkmodeContext from "./ThemeProvider";
-import { useContext } from "react";
 
 export function ToastProvider() {
   const [darkmode] = useContext(DarkmodeContext) as DarkmodeContext;

@@ -5,17 +5,17 @@ import { apiClient } from "src/api";
 
 const getLogout = async () => {
   const response = await apiClient.get("/auth/logout");
-  return response.data
+  return response.data;
 };
 
 export const useLogout = () => {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["auth", "logout"],
     mutationFn: getLogout,
     onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ["auth"], exact: true})
+      queryClient.invalidateQueries({ queryKey: ["auth"], exact: true });
       toast.success("Logged out!", { toastId: "logoutSuccessMessage" });
-    }
-  })
-}
+    },
+  });
+};

@@ -1,9 +1,9 @@
 import { Routes, Route } from "react-router-dom";
 
-import TestQuery from "./Query";
-import TestOutlet from "../../components/test/Outlet";
-import TestFetch from "./Fetch";
 import TestChat from "./Chat";
+import TestQuery from "./Query";
+import TestFetch from "./Fetch";
+import TestOutlet from "../../components/test/Outlet";
 
 function TestRoutes() {
   return (

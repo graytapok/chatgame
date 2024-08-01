@@ -1,31 +1,33 @@
 import { Flex, Text, Button } from "@radix-ui/themes";
-import { User } from "src/types/auth";
+import { useAppSelector } from "src/hooks";
 
-interface Props {
-  symbol: string | undefined;
-  user: User | null;
-  opponent: { username: string; symbol: string } | undefined;
-}
-
-const Players = ({ symbol, user, opponent }: Props) => {
+const Players = () => {
+  const user = useAppSelector((state) => state.user);
+  const { playerSymbol, opponent } = useAppSelector((state) => state.tictactoe);
   return (
     <Flex className="text-center justify-center m-4 gap-3">
       <Flex className="justify-center items-center gap-2">
-        <Text>{user ? user.username : "You"}</Text>
+        <Text>{user.authenticated ? user.username : "You"}</Text>
         <Button
-          color={symbol === "X" ? "blue" : symbol === "O" ? "red" : "gray"}
+          color={
+            playerSymbol === "X"
+              ? "blue"
+              : playerSymbol === "O"
+              ? "red"
+              : "gray"
+          }
           className={
             `${
-              symbol === "X"
+              playerSymbol === "X"
                 ? "bg-blue-500"
-                : symbol === "O"
+                : playerSymbol === "O"
                 ? "bg-red-500"
                 : ""
             }` + " dark:text-white text-black cursor-default"
           }
           disabled={true}
         >
-          {symbol}
+          {playerSymbol}
         </Button>
       </Flex>
 

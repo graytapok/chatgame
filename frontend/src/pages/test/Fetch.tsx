@@ -1,10 +1,10 @@
-import { useState, useRef } from "react";
 import { ClipLoader } from "react-spinners";
-import { IUser } from "src/types/auth";
+import { useState, useRef } from "react";
+import { User } from "src/types/auth";
 
 function Buttons() {
   const [loading, setLoading] = useState<boolean>(false);
-  const [user, setUser] = useState<IUser | null>();
+  const [user, setUser] = useState<User | null>();
   const [error, setError] = useState<any>();
   const [message, setMessage] = useState<string | null>();
 
@@ -24,7 +24,7 @@ function Buttons() {
       });
       const json = await response.json();
       if (response.status === 200) {
-        const resUser = json.user as IUser;
+        const resUser = json.user as User;
         setUser(resUser);
       } else {
         setMessage(json.message);
@@ -60,7 +60,7 @@ function Buttons() {
       });
       const json = await response.json();
       if (response.status === 200) {
-        const resUser = json.user as IUser;
+        const resUser = json.user as User;
         setUser(resUser);
       } else {
         setMessage(json.message);

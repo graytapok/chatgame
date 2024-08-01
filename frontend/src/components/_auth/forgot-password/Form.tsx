@@ -7,9 +7,9 @@ import {
   PersonIcon,
 } from "@radix-ui/react-icons";
 
-import { useForgotPassword } from "src/api/auth/useForgotPassword";
-import CenterCard from "src/components/ui/CenterCard";
 import Button from "src/components/ui/Button";
+import CenterCard from "src/components/ui/CenterCard";
+import { useForgotPassword } from "src/api/auth/useForgotPassword";
 
 function ForgotPassword() {
   const fetchForgotPassword = useForgotPassword();

@@ -1,6 +1,5 @@
-import { useContext } from "react";
 import { NavLink } from "react-router-dom";
-import AuthContext from "src/providers/AuthProvider";
+import { useAppSelector } from "src/hooks";
 
 interface INavbarLink {
   location: string;
@@ -21,7 +20,7 @@ function NavbarLink({ location, text }: INavbarLink) {
 }
 
 function NavbarLinks() {
-  const { user } = useContext(AuthContext) as AuthContext;
+  const user = useAppSelector((state) => state.user);
   return (
     <ul className="flex items-center gap-4 pl-8 mt-1">
       <li>
@@ -33,7 +32,7 @@ function NavbarLinks() {
       <li>
         <NavbarLink location="/about" text="About" />
       </li>
-      {user?.admin && (
+      {user.admin && (
         <li>
           <NavbarLink location="/test" text="Test" />
         </li>

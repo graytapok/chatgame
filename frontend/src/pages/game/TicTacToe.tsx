@@ -1,25 +1,24 @@
-import {
-  ChangeEvent,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Flex, Heading } from "@radix-ui/themes";
-import { Socket } from "socket.io-client";
 
+import {
+  gameBegin,
+  gameOver,
+  madeMove,
+  opponentLeft,
+  reset,
+} from "src/features/tictactoeSlice";
 import Chat from "src/components/Chat";
 import { manager } from "src/api/socket";
 import Button from "src/components/ui/Button";
-import AuthContext from "src/providers/AuthProvider";
 import Fields from "src/components/game/tictactoe/Fields";
+import { useAppDispatch, useAppSelector } from "src/hooks";
 import Players from "src/components/game/tictactoe/Players";
 import Messages from "src/components/game/tictactoe/Messages";
+import type { Winner, Turn } from "src/features/tictactoeSlice";
 import FinishButtons from "src/components/game/tictactoe/FinishButtons";
 
 export const socket = manager.socket("/tictactoe");
-
-export const TicTacToeContext = createContext<Socket>(socket);
 
 interface Opponent {
   username: string;
@@ -34,55 +33,48 @@ interface OnGameBeginResponse {
 interface OnMadeMoveResponse {
   position: string;
   symbol: string;
-  turn: string;
+  turn: Turn;
 }
 
 function TicTacToe() {
-  const { user } = useContext(AuthContext) as AuthContext;
-  const [symbol, setSymbol] = useState<string | undefined>();
+  const tictactoe = useAppSelector((state) => state.tictactoe);
+  const dispatch = useAppDispatch();
 
-  const [gameStatus, setGameStatus] = useState<string>("searching");
   const [fields, setFields] = useState<JSX.Element[]>([]);
-  const [turn, setTurn] = useState<string | undefined>();
-  const [winner, setWinner] = useState<string | undefined>();
 
-  const [opponent, setOpponent] = useState<Opponent | undefined>();
-  const [opponentLeft, setOpponentLeft] = useState<boolean>(false);
+  const generateFields = () => {
+    const fields: JSX.Element[] = [];
 
-  const [nextGame, setNextGame] = useState<number>(0);
+    for (let i = 1; i < 10; i += 1) {
+      fields.push(
+        <Flex className="items-center justify-center" key={i}>
+          <Button
+            id={i.toString()}
+            className="h-24 w-24 flex justify-center items-center"
+            color="gray"
+            variant="soft"
+            highContrast={true}
+            onClick={(e: ChangeEvent) => socket.emit("make_move", e.target.id)}
+          />
+        </Flex>
+      );
+    }
 
-  const messagesProps = {
-    symbol,
-    gameStatus,
-    opponentLeft,
-    opponent,
-    turn,
-    winner,
-  };
-
-  const finishButtonsProps = {
-    gameStatus,
-    opponentLeft,
-
-    setNextGame,
-    setFields,
-
-    reset: () => reset(),
+    return fields;
   };
 
   const onGameBegin = (data: OnGameBeginResponse) => {
-    setSymbol(data.symbol);
-    setOpponent({
-      username: data.opponent.username,
-      symbol: data.opponent.symbol,
-    });
-    setTurn("X");
-    setGameStatus("active");
+    dispatch(
+      gameBegin({
+        playerSymbol: data.symbol,
+        opponent: data.opponent,
+        turn: "X",
+      })
+    );
   };
 
-  const onGameOver = (data: { winner: string }) => {
-    setWinner(data.winner);
-    setGameStatus("finished");
+  const onGameOver = (data: { winner: Winner }) => {
+    dispatch(gameOver({ winner: data.winner }));
   };
 
   const onMadeMove = (data: OnMadeMoveResponse) => {
@@ -93,33 +85,19 @@ function TicTacToe() {
       const newClassName = data.symbol === "X" ? " bg-blue-500" : " bg-red-500";
       field.className = prevClassName + newClassName;
       field.setAttribute("disabled", "");
-      setTurn(data.turn);
+
+      dispatch(madeMove({ turn: data.turn }));
     }
   };
 
   const onOpponentLeft = () => {
-    setGameStatus("finished");
-    setOpponentLeft(true);
+    dispatch(opponentLeft());
   };
 
   useEffect(() => {
     socket.connect();
 
-    for (let i = 1; i < 10; i += 1) {
-      setFields((prev) => [
-        ...prev,
-        <Flex className="items-center justify-center" key={i}>
-          <Button
-            id={i.toString()}
-            className="h-24 w-24 flex justify-center items-center"
-            color="gray"
-            variant="soft"
-            highContrast={true}
-            onClick={(e: ChangeEvent) => socket.emit("make_move", e.target.id)}
-          />
-        </Flex>,
-      ]);
-    }
+    setFields(generateFields());
 
     socket.on("game_over", onGameOver);
     socket.on("made_move", onMadeMove);
@@ -127,48 +105,45 @@ function TicTacToe() {
     socket.on("opponent_left", onOpponentLeft);
 
     return () => {
-      reset();
-
       socket.off("game_over", onGameOver);
       socket.off("made_move", onMadeMove);
       socket.off("game_begin", onGameBegin);
       socket.off("opponent_left", onOpponentLeft);
 
       socket.disconnect();
-    };
-  }, [nextGame]);
 
-  const reset = () => {
-    setGameStatus("searching");
-    setOpponentLeft(false);
-    setOpponent(undefined);
-    setWinner(undefined);
-    setSymbol(undefined);
-    setTurn(undefined);
-    setFields([]);
-  };
+      setFields([]);
+
+      if (tictactoe.nextGame != 0) {
+        dispatch(reset());
+      }
+    };
+  }, [tictactoe.nextGame]);
 
   return (
-    <TicTacToeContext.Provider value={socket}>
+    <>
       <Heading className="text-center m-10 mb-5" size="8">
         Tic Tac Toe
       </Heading>
 
-      <Players symbol={symbol} user={user} opponent={opponent} />
+      <Players />
 
       <Flex justify="center" gap="6" className="h-[400px]">
         <Fields fields={fields} />
         <Chat
           namespace="/tictactoe"
-          loading={gameStatus === "searching"}
+          loading={
+            tictactoe.gameStatus === "searching" ||
+            tictactoe.gameStatus === undefined
+          }
           className="w-[400px]"
         />
       </Flex>
 
-      <Messages {...messagesProps} />
+      <Messages />
 
-      <FinishButtons {...finishButtonsProps} />
-    </TicTacToeContext.Provider>
+      <FinishButtons setFields={setFields} />
+    </>
   );
 }
 
