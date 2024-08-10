@@ -47,10 +47,10 @@ def create_app(test: bool = False):
     api.add_namespace(namespaces.errors_ns)
     api.add_namespace(namespaces.auth_ns, path="/auth")
 
-    from chatgame.sockets import Chat, TicTacToe
+    from chatgame.sockets import ChatSocket, TicTacToeSocket
 
-    socketio.on_namespace(Chat(namespace="/chat"))
-    socketio.on_namespace(TicTacToe(namespace="/tictactoe"))
+    socketio.on_namespace(ChatSocket(namespace="/chat"))
+    socketio.on_namespace(TicTacToeSocket(namespace="/tictactoe"))
 
     @app.shell_context_processor
     def shell():

@@ -12,7 +12,6 @@ function TestRoutes() {
         <Route index element={<TestQuery />} />
         <Route path="/fetch" element={<TestFetch />} />
         <Route path="/chat" element={<TestChat />} />
-        <Route path="*" element={<p>Not Found</p>} />
       </Route>
     </Routes>
   );

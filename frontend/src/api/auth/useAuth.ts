@@ -13,6 +13,8 @@ const getAuth = async () => {
     store.dispatch(login(response.data.user));
     return response.data;
   }
+
+  return {};
 };
 
 export const useAuth = () => {

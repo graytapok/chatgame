@@ -1,6 +1,8 @@
 import { Heading, SegmentedControl } from "@radix-ui/themes";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 
+const pages: string[] = ["query", "fetch", "chat", "folders"];
+
 function TestOutlet() {
   const navigate = useNavigate();
   const { "*": param } = useParams();
@@ -10,21 +12,17 @@ function TestOutlet() {
         Test
       </Heading>
       <SegmentedControl.Root defaultValue={param || "query"} className="m-4">
-        <SegmentedControl.Item value="query" onClick={() => navigate("/test")}>
-          Query
-        </SegmentedControl.Item>
-        <SegmentedControl.Item
-          value="fetch"
-          onClick={() => navigate("/test/fetch")}
-        >
-          Fetch
-        </SegmentedControl.Item>
-        <SegmentedControl.Item
-          value="chat"
-          onClick={() => navigate("/test/chat")}
-        >
-          Chat
-        </SegmentedControl.Item>
+        {pages.map((page) => (
+          <SegmentedControl.Item
+            value={page}
+            key={page}
+            onClick={() =>
+              navigate(page == "query" ? `/test` : `/test/${page}`)
+            }
+          >
+            {page}
+          </SegmentedControl.Item>
+        ))}
       </SegmentedControl.Root>
       <Outlet />
     </>

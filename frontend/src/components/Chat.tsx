@@ -9,7 +9,7 @@ import {
   Spinner,
 } from "@radix-ui/themes";
 import { PaperPlaneIcon, Pencil1Icon } from "@radix-ui/react-icons";
-import { manager } from "src/api/socket";
+import { manager } from "src/api/sockets";
 
 interface Message {
   type: "message" | "info";

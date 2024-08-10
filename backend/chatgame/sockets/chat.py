@@ -2,7 +2,7 @@ from flask import request
 from flask_socketio import Namespace, join_room, leave_room, emit, rooms
 from flask_login import current_user
 
-class Chat(Namespace):
+class ChatSocket(Namespace):
     def on_join_chat(self, room):
         join_room(room)
 

@@ -1,122 +1,46 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Flex, Heading } from "@radix-ui/themes";
 
-import {
-  gameBegin,
-  gameOver,
-  madeMove,
-  opponentLeft,
-  reset,
-} from "src/features/tictactoeSlice";
 import Chat from "src/components/Chat";
-import { manager } from "src/api/socket";
-import Button from "src/components/ui/Button";
+import { manager } from "src/api/sockets";
+import { reset } from "src/features/tictactoeSlice";
 import Fields from "src/components/game/tictactoe/Fields";
 import { useAppDispatch, useAppSelector } from "src/hooks";
 import Players from "src/components/game/tictactoe/Players";
+import TicTacToeSocket from "src/api/sockets/TicTacToeSocket";
 import Messages from "src/components/game/tictactoe/Messages";
-import type { Winner, Turn } from "src/features/tictactoeSlice";
 import FinishButtons from "src/components/game/tictactoe/FinishButtons";
 
-export const socket = manager.socket("/tictactoe");
-
-interface Opponent {
-  username: string;
-  symbol: string;
-}
-
-interface OnGameBeginResponse {
-  symbol: string;
-  opponent: Opponent;
-}
-
-interface OnMadeMoveResponse {
-  position: string;
-  symbol: string;
-  turn: Turn;
-}
+const socketListener = manager.socket("/tictactoe");
+const socket = new TicTacToeSocket(socketListener);
 
 function TicTacToe() {
   const tictactoe = useAppSelector((state) => state.tictactoe);
   const dispatch = useAppDispatch();
 
-  const [fields, setFields] = useState<JSX.Element[]>([]);
-
-  const generateFields = () => {
-    const fields: JSX.Element[] = [];
-
-    for (let i = 1; i < 10; i += 1) {
-      fields.push(
-        <Flex className="items-center justify-center" key={i}>
-          <Button
-            id={i.toString()}
-            className="h-24 w-24 flex justify-center items-center"
-            color="gray"
-            variant="soft"
-            highContrast={true}
-            onClick={(e: ChangeEvent) => socket.emit("make_move", e.target.id)}
-          />
-        </Flex>
-      );
-    }
-
-    return fields;
-  };
-
-  const onGameBegin = (data: OnGameBeginResponse) => {
-    dispatch(
-      gameBegin({
-        playerSymbol: data.symbol,
-        opponent: data.opponent,
-        turn: "X",
-      })
-    );
-  };
-
-  const onGameOver = (data: { winner: Winner }) => {
-    dispatch(gameOver({ winner: data.winner }));
-  };
-
-  const onMadeMove = (data: OnMadeMoveResponse) => {
-    const field = document.getElementById(data.position);
-    if (field) {
-      field.textContent = data.symbol;
-      const prevClassName = field.className;
-      const newClassName = data.symbol === "X" ? " bg-blue-500" : " bg-red-500";
-      field.className = prevClassName + newClassName;
-      field.setAttribute("disabled", "");
-
-      dispatch(madeMove({ turn: data.turn }));
-    }
-  };
-
-  const onOpponentLeft = () => {
-    dispatch(opponentLeft());
-  };
-
   useEffect(() => {
-    socket.connect();
+    socketListener.connect();
 
-    setFields(generateFields());
-
-    socket.on("game_over", onGameOver);
-    socket.on("made_move", onMadeMove);
-    socket.on("game_begin", onGameBegin);
-    socket.on("opponent_left", onOpponentLeft);
+    socketListener.on("game_over", socket.onGameOver);
+    socketListener.on("made_move", socket.onMadeMove);
+    socketListener.on("game_begin", socket.onGameBegin);
+    socketListener.on("opponent_left", socket.onOpponentLeft);
+    socketListener.on("rematch_accepted", socket.onRematchAccepted);
+    socketListener.on("rematch_rejected", socket.onRematchRejected);
+    socketListener.on("rematch_request", socket.onRematchRequest);
 
     return () => {
-      socket.off("game_over", onGameOver);
-      socket.off("made_move", onMadeMove);
-      socket.off("game_begin", onGameBegin);
-      socket.off("opponent_left", onOpponentLeft);
+      socketListener.off("game_over");
+      socketListener.off("made_move");
+      socketListener.off("game_begin");
+      socketListener.off("opponent_left");
+      socketListener.off("rematch_accepted");
+      socketListener.off("rematch_rejected");
+      socketListener.off("rematch_request");
 
-      socket.disconnect();
+      socketListener.disconnect();
 
-      setFields([]);
-
-      if (tictactoe.nextGame != 0) {
-        dispatch(reset());
-      }
+      dispatch(reset());
     };
   }, [tictactoe.nextGame]);
 
@@ -129,12 +53,11 @@ function TicTacToe() {
       <Players />
 
       <Flex justify="center" gap="6" className="h-[400px]">
-        <Fields fields={fields} />
+        <Fields makeMove={socket.makeMove} />
         <Chat
           namespace="/tictactoe"
           loading={
-            tictactoe.gameStatus === "searching" ||
-            tictactoe.gameStatus === undefined
+            tictactoe.status === "searching" || tictactoe.status === undefined
           }
           className="w-[400px]"
         />
@@ -142,7 +65,7 @@ function TicTacToe() {
 
       <Messages />
 
-      <FinishButtons setFields={setFields} />
+      <FinishButtons requestRematch={socket.requestRematch} />
     </>
   );
 }

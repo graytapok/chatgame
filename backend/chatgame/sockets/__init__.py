@@ -1,2 +1,2 @@
-from .chat import Chat
-from .tictactoe import TicTacToe
+from .chat import ChatSocket
+from .tictactoe import TicTacToeSocket
