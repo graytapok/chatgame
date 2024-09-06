@@ -1,7 +1,7 @@
 import { Heading, SegmentedControl } from "@radix-ui/themes";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 
-const pages: string[] = ["query", "fetch", "chat", "folders"];
+const pages: string[] = ["query", "fetch", "chat"];
 
 function TestOutlet() {
   const navigate = useNavigate();

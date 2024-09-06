@@ -4,7 +4,7 @@ import AppLayout from "src/components/AppLayout";
 
 import Home from "./Home";
 import About from "./About";
-import GameRoutes from "./game";
+import GameRoutes from "./games";
 import TestRoutes from "./test";
 import AuthRoutes from "./_auth";
 

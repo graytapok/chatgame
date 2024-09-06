@@ -56,11 +56,6 @@ function Chat({
   useEffect(scrollToBottom, [messages]);
 
   useEffect(() => {
-    if (!loading) {
-      socket.connect();
-      socket.emit("join_chat", room);
-    }
-
     const onInfo = (info: Message) => {
       setMessages((prev) => [
         ...prev,
@@ -72,8 +67,15 @@ function Chat({
       setMessages((prev) => [...prev, { ...data, type: "message" }]);
     };
 
-    socket.on("info", onInfo);
-    socket.on("message", onMessage);
+    if (!loading) {
+      if (!namespace) {
+        socket.connect();
+      }
+      socket.emit("join_room", room);
+
+      socket.on("info", onInfo);
+      socket.on("message", onMessage);
+    }
 
     return () => {
       socket.off("info", onInfo);
@@ -81,8 +83,10 @@ function Chat({
 
       if (!loading) {
         setMessages([]);
-        socket.emit("leave_chat", room);
-        socket.disconnect();
+        socket.emit("leave_room", room);
+        if (!namespace) {
+          socket.disconnect();
+        }
       }
     };
   }, [loading]);

@@ -4,8 +4,6 @@ from chatgame.extensions import db
 
 from ..errors import errors_bp
 
-from icecream import ic
-
 @errors_bp.app_errorhandler(400)
 def bad_request(e):
     ic(e, request.base_url)

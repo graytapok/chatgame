@@ -3,7 +3,7 @@ import { useAppSelector } from "src/hooks";
 
 const Messages = () => {
   const { playerSymbol, winner, turn, opponent } = useAppSelector(
-    (state) => state.tictactoe
+    (state) => state.games.tictactoe
   );
   return (
     <Flex className="items-center justify-center m-5">

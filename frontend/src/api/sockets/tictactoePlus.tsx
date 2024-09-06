@@ -2,38 +2,37 @@ import { Button, Flex, Text } from "@radix-ui/themes";
 import { Socket } from "socket.io-client";
 import { toast } from "react-toastify";
 
+import { store } from "src/store";
 import {
   gameBegin,
   gameOver,
   madeMove,
-  Opponent,
   opponentLeft,
   rematch,
-  Turn,
-  Winner,
-} from "src/features/tictactoeSlice";
-import { store } from "src/store";
+} from "src/features/gamesSlice/tictactoePlusSlice";
+import { Opponent, Turn, Winner } from "src/features/gamesSlice/tictactoeSlice";
 
-interface OnGameBeginResponse {
+export interface OnGameBeginResponse {
   symbol: string;
   opponent: Opponent;
 }
 
 interface OnMadeMoveResponse {
-  position: string;
+  field: string;
+  subField: string;
   symbol: Turn;
   turn: Turn;
 }
 
-class TicTacToeSocket {
+class TictactoePlusSocket {
   socket: Socket;
 
   constructor(socket: Socket) {
     this.socket = socket;
   }
 
-  makeMove = (id: string) => {
-    this.socket.emit("make_move", id);
+  makeMove = (field: string, subField: string) => {
+    this.socket.emit("make_move", field, subField);
   };
 
   acceptRematch = () => {
@@ -72,7 +71,7 @@ class TicTacToeSocket {
   };
 
   onRematchAccepted = () => {
-    const rematchStatus = store.getState().tictactoe.rematch;
+    const rematchStatus = store.getState().games.tictactoe.rematch;
     if (rematchStatus === "requested") {
       toast.success("Rematch request accepted!", { toastId: "rematch" });
     }
@@ -101,7 +100,7 @@ class TicTacToeSocket {
       {
         toastId: "rematchRecieved",
         onClose: () => {
-          if (store.getState().tictactoe.rematch === "recieved") {
+          if (store.getState().games.tictactoe.rematch === "recieved") {
             this.rejectRematch();
           }
         },
@@ -110,4 +109,4 @@ class TicTacToeSocket {
   };
 }
 
-export default TicTacToeSocket;
+export default TictactoePlusSocket;

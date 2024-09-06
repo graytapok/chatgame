@@ -2,8 +2,15 @@ from flask import request
 from flask_socketio import Namespace, join_room, leave_room, emit, rooms
 from flask_login import current_user
 
+from .manager import ChatManager
+
+manager = ChatManager()
+
 class ChatSocket(Namespace):
-    def on_join_chat(self, room):
+    def on_connect(self):
+        pass
+
+    def on_join_room(self, room):
         join_room(room)
 
         if current_user.is_authenticated:
@@ -34,7 +41,7 @@ class ChatSocket(Namespace):
         )
         emit("message", {"message": message, "sender": "You"}, json=True, to=request.sid)
 
-    def on_leave_chat(self, room):
+    def on_leave_room(self, room):
         leave_room(room)
 
         if current_user.is_authenticated:
@@ -53,3 +60,6 @@ class ChatSocket(Namespace):
             )
 
         emit("info", {"message": "You leaved!"})
+
+    def on_disconnect(self):
+        pass

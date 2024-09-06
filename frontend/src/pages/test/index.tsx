@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import TestChat from "./Chat";
 import TestQuery from "./Query";
 import TestFetch from "./Fetch";
-import TestOutlet from "../../components/test/Outlet";
+import TestOutlet from "./Outlet";
 
 function TestRoutes() {
   return (

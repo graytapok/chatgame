@@ -8,12 +8,16 @@ from chatgame.config import Config, TestConfig
 from chatgame.extensions import *
 from chatgame.database import *
 
+from icecream import install, ic
 import os
 
 __all__ = [
     "create_app",
     "Config"
 ]
+
+ic.configureOutput(includeContext=True)
+install()
 
 def create_app(test: bool = False):
     ConfigClass = TestConfig if test else Config
@@ -40,17 +44,17 @@ def create_app(test: bool = False):
     login.init_app(app)
     socketio.init_app(app)
 
-    from chatgame import namespaces
+    from chatgame import namespaces, sockets
 
     app.register_blueprint(namespaces.errors_bp)
 
     api.add_namespace(namespaces.errors_ns)
     api.add_namespace(namespaces.auth_ns, path="/auth")
 
-    from chatgame.sockets import ChatSocket, TicTacToeSocket
-
-    socketio.on_namespace(ChatSocket(namespace="/chat"))
-    socketio.on_namespace(TicTacToeSocket(namespace="/tictactoe"))
+    with app.app_context():
+        socketio.on_namespace(sockets.ChatSocket(namespace="/chat"))
+        socketio.on_namespace(sockets.TictactoeSocket(namespace="/tictactoe"))
+        socketio.on_namespace(sockets.TictactoePlusSocket(namespace="/tictactoe_plus"))
 
     @app.shell_context_processor
     def shell():

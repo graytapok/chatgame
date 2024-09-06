@@ -2,14 +2,12 @@ from flask import request
 from flask_login import current_user
 from flask_socketio import join_room, emit, close_room, Namespace
 
-from .manager import TictactoeManager
+from .manager import TictactoePlusManager
 
-manager = TictactoeManager()
+manager = TictactoePlusManager()
 
-
-class TictactoeSocket(Namespace):
+class TictactoePlusSocket(Namespace):
     def on_connect(self):
-
         sid = request.sid
 
         username = None
@@ -19,7 +17,7 @@ class TictactoeSocket(Namespace):
 
         unmatched_before = manager.unmatched_player_id
 
-        manager.add_player(sid, username=username)
+        manager.add_player(sid, username)
 
         if unmatched_before is not None:
             manager.setup_game(sid)
@@ -30,8 +28,6 @@ class TictactoeSocket(Namespace):
 
             join_room(room)
             join_room(room, sid=opponent.sid)
-
-            game = manager.get_game(sid)
 
             emit(
                 "game_begin",
@@ -75,7 +71,7 @@ class TictactoeSocket(Namespace):
                 json=True
             )
 
-    def on_message(self, message, room):
+    def on_message(self, message):
         sid = request.sid
 
         player = manager.get_player(sid)
@@ -104,26 +100,33 @@ class TictactoeSocket(Namespace):
             to=sid
         )
 
-    def on_make_move(self, move):
+    def on_make_move(self, field, sub_field):
         sid = request.sid
 
         player = manager.get_player(sid)
         room = manager.get_room(sid)
         game = manager.get_game(sid)
 
-        res = manager.make_move(sid, move)
+        res = manager.make_move_plus(sid, field, sub_field)
 
         if res:
             emit(
                 "made_move",
-                {
-                    "position": move,
-                    "symbol": player.symbol,
-                    "turn": game.turn,
-                },
+                {"field": field, "subField": sub_field, "symbol": player.symbol, "turn": game.turn},
                 json=True,
                 room=room
             )
+
+            if "field_winner" in res:
+                if "symbol" in res["field_winner"]:
+                    emit(
+                        "field_winner",
+                        {
+                            "field": res["field_winner"]["field"],
+                            "symbol": res["field_winner"]["symbol"]
+                        },
+                        json=True,
+                        to=room)
 
             if "winner" in res:
                 emit("game_over", {"winner": res["winner"]}, json=True, to=room)

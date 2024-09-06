@@ -3,7 +3,9 @@ import { useAppSelector } from "src/hooks";
 
 const Players = () => {
   const user = useAppSelector((state) => state.user);
-  const { playerSymbol, opponent } = useAppSelector((state) => state.tictactoe);
+  const { playerSymbol, opponent } = useAppSelector(
+    (state) => state.games.tictactoe
+  );
   return (
     <Flex className="text-center justify-center m-4 gap-3">
       <Flex className="justify-center items-center gap-2">

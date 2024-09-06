@@ -4,16 +4,12 @@ import { Flex } from "@radix-ui/themes";
 import { LuSwords } from "react-icons/lu";
 
 import { useAppDispatch, useAppSelector } from "src/hooks";
-import { nextGame } from "src/features/tictactoeSlice";
 import Button from "src/components/ui/Button";
+import { nextGame } from "src/features/gamesSlice/tictactoeSlice";
 
-interface Props {
-  requestRematch: () => void;
-}
-
-const FinishButtons = ({ requestRematch }: Props) => {
+const FinishButtons = ({ requestRematch }: { requestRematch: () => void }) => {
   const { status, opponent, rematch } = useAppSelector(
-    (state) => state.tictactoe
+    (state) => state.games.tictactoe
   );
   const dispatch = useAppDispatch();
   const navigate = useNavigate();

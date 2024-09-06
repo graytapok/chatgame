@@ -4,7 +4,7 @@ import { useAppSelector } from "src/hooks";
 import Button from "src/components/ui/Button";
 
 const Fields = ({ makeMove }: { makeMove: (id: string) => void }) => {
-  const { fields } = useAppSelector((state) => state.tictactoe);
+  const { fields } = useAppSelector((state) => state.games.tictactoe);
   const dummyFields: JSX.Element[] = [];
 
   for (let i = 1; i < 10; i++) {

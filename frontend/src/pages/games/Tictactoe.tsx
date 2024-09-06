@@ -3,19 +3,19 @@ import { Flex, Heading } from "@radix-ui/themes";
 
 import Chat from "src/components/Chat";
 import { manager } from "src/api/sockets";
-import { reset } from "src/features/tictactoeSlice";
-import Fields from "src/components/game/tictactoe/Fields";
+import TictactoeSocket from "src/api/sockets/tictactoe";
+import Fields from "src/components/games/tictactoe/Fields";
 import { useAppDispatch, useAppSelector } from "src/hooks";
-import Players from "src/components/game/tictactoe/Players";
-import TicTacToeSocket from "src/api/sockets/TicTacToeSocket";
-import Messages from "src/components/game/tictactoe/Messages";
-import FinishButtons from "src/components/game/tictactoe/FinishButtons";
+import Players from "src/components/games/tictactoe/Players";
+import { reset } from "src/features/gamesSlice/tictactoeSlice";
+import Messages from "src/components/games/tictactoe/Messages";
+import FinishButtons from "src/components/games/tictactoe/FinishButtons";
 
 const socketListener = manager.socket("/tictactoe");
-const socket = new TicTacToeSocket(socketListener);
+const socket = new TictactoeSocket(socketListener);
 
-function TicTacToe() {
-  const tictactoe = useAppSelector((state) => state.tictactoe);
+function Tictactoe() {
+  const tictactoe = useAppSelector((state) => state.games.tictactoe);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -70,4 +70,4 @@ function TicTacToe() {
   );
 }
 
-export default TicTacToe;
+export default Tictactoe;
