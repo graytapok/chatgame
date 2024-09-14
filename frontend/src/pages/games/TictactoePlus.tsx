@@ -1,43 +1,77 @@
+import { Flex, Heading } from "@radix-ui/themes";
 import { useEffect } from "react";
 
-import { manager } from "src/api/sockets";
+import Chat from "src/components/Chat";
+import { manager as socketManager } from "src/api/sockets";
+import { useAppDispatch, useAppSelector } from "src/hooks";
+import Players from "src/components/games/tictactoe/Players";
 import TictactoePlusSocket from "src/api/sockets/tictactoePlus";
+import Fields from "src/components/games/tictactoe-plus/Fields";
 import { reset } from "src/features/gamesSlice/tictactoePlusSlice";
-import { useAppDispatch } from "src/hooks";
+import Messages from "src/components/games/tictactoe-plus/Messages";
+import FinishButtons from "src/components/games/tictactoe/FinishButtons";
 
-const socketListener = manager.socket("/tictactoe_plus");
-const socket = new TictactoePlusSocket(socketListener);
+const socket = socketManager.socket("/tictactoe_plus");
+const manager = new TictactoePlusSocket(socket);
 
 const TictactoePlus = () => {
+  const tictactoePlus = useAppSelector((state) => state.games.tictactoePlus);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    socketListener.connect();
+    socket.connect();
 
-    socketListener.on("game_over", socket.onGameOver);
-    socketListener.on("made_move", socket.onMadeMove);
-    socketListener.on("game_begin", socket.onGameBegin);
-    socketListener.on("opponent_left", socket.onOpponentLeft);
-    socketListener.on("rematch_accepted", socket.onRematchAccepted);
-    socketListener.on("rematch_rejected", socket.onRematchRejected);
-    socketListener.on("rematch_request", socket.onRematchRequest);
+    socket.on("game_over", manager.onGameOver);
+    socket.on("made_move", manager.onMadeMove);
+    socket.on("game_begin", manager.onGameBegin);
+    socket.on("field_winner", manager.onFieldWinner);
+    socket.on("opponent_left", manager.onOpponentLeft);
+    socket.on("rematch_accepted", manager.onRematchAccepted);
+    socket.on("rematch_rejected", manager.onRematchRejected);
+    socket.on("rematch_request", manager.onRematchRequest);
 
     return () => {
-      socketListener.off("game_over");
-      socketListener.off("made_move");
-      socketListener.off("game_begin");
-      socketListener.off("opponent_left");
-      socketListener.off("rematch_accepted");
-      socketListener.off("rematch_rejected");
-      socketListener.off("rematch_request");
+      socket.off("game_over", manager.onGameOver);
+      socket.off("made_move", manager.onMadeMove);
+      socket.off("game_begin", manager.onGameBegin);
+      socket.off("field_winner", manager.onFieldWinner);
+      socket.off("opponent_left", manager.onOpponentLeft);
+      socket.off("rematch_accepted", manager.onRematchAccepted);
+      socket.off("rematch_rejected", manager.onRematchRejected);
+      socket.off("rematch_request", manager.onRematchRequest);
 
-      socketListener.disconnect();
+      socket.disconnect();
 
       dispatch(reset());
     };
-  });
+  }, [tictactoePlus.nextGame]);
 
-  return <div>TictactoePlus</div>;
+  return (
+    <>
+      <Heading className="text-center m-10 mb-5" size="8">
+        Tic Tac Toe Plus
+      </Heading>
+
+      <Players plus />
+
+      <Flex justify="center" gap="6" className="h-[550px]">
+        <Fields makeMove={manager.makeMove} />
+        <Chat
+          socket={socket}
+          height="500px"
+          loading={
+            tictactoePlus.status === "searching" ||
+            tictactoePlus.status === undefined
+          }
+          className="w-[400px]"
+        />
+      </Flex>
+
+      <Messages />
+
+      <FinishButtons plus requestRematch={manager.requestRematch} />
+    </>
+  );
 };
 
 export default TictactoePlus;

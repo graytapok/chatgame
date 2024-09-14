@@ -3,7 +3,9 @@ from ..tictactoe import TictactoeManager
 
 
 class TictactoePlusManager(TictactoeManager):
-    def setup_game(self, sid):
+    games: dict[str, Game] = {}
+
+    def setup_game(self, sid: str):
         if sid not in self.players:
             return
 
@@ -17,12 +19,12 @@ class TictactoePlusManager(TictactoeManager):
 
         room = player.sid + opponent.sid
 
-        player.set_room(room)
-        opponent.set_room(room)
+        player.room = room
+        opponent.room = room
 
-        self.games.update({room: Game(room)})
+        self.games.update({room: Game(room=room)})
 
-    def make_move_plus(self, sid, field, sub_field):
+    def make_move_plus(self, sid: str, field: int, sub_field: int) -> dict | None:
         player = self.get_player(sid)
         opponent = self.get_opponent(sid)
         game = self.get_game(sid)
@@ -30,36 +32,53 @@ class TictactoePlusManager(TictactoeManager):
         if not opponent:
             return
 
-        if (field < 1 or field > 9) or (sub_field < 1 or sub_field > 9):
+        if (field < 0 or field > 8) or (sub_field < 0 or sub_field > 8):
             return
 
         if game.check_winner():
             return
 
-        if game.turn != player.symbol:
+        if game.turn.symbol != player.symbol:
             return
 
-        game.turn = "X" if player.symbol == "O" else "O"
-
-        if game.fields[field]["value"] == "":
+        if game.turn.field is not None and game.turn.field != field:
             return
 
-        if game.fields[field]["fields"][sub_field] == "":
+        if game.fields[field].value:
             return
 
-        game.fields[field]["fields"][sub_field] = player.symbol
+        if game.fields[field].sub_fields[sub_field]:
+            return
 
-        return {
-            "winner": game.check_winner(),
-            "field_winner": {
-                "field": field,
-                "symbol": game.check_fields()
-            },
-        }
+        game.fields[field].sub_fields[sub_field] = player.symbol
 
-    def make_move(self, sid, move): return None
+        res = {"made_move": True}
 
-    def rematch(self, sid, decision):
+        if field_winner := game.check_field(field):
+            game.fields[field].value = field_winner
+            res.update({
+                "field_winner": {
+                    "winner": field_winner,
+                    "field": field
+                }
+            })
+
+        if winner := game.check_winner():
+            game.status = "finished"
+            res.update({"winner": winner})
+
+        game.turn.symbol = "X" if player.symbol == "O" else "O"
+
+        if game.fields[sub_field].value:
+            game.turn.field = None
+        else:
+            game.turn.field = sub_field
+
+        return res
+
+    def make_move(self, sid: str, move): return None
+
+    def rematch(self, sid: str, decision: bool):
         player = self.get_player(sid)
         opponent = self.get_opponent(sid)
         game = self.get_game(sid)
@@ -91,7 +110,7 @@ class TictactoePlusManager(TictactoeManager):
 
         return
 
-    def get_game(self, sid) -> None | Game:
+    def get_game(self, sid: str):
         if sid not in self.players:
             return
 

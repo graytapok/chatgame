@@ -3,7 +3,7 @@ import { Card, Flex, Grid } from "@radix-ui/themes";
 import { useAppSelector } from "src/hooks";
 import Button from "src/components/ui/Button";
 
-const Fields = ({ makeMove }: { makeMove: (id: string) => void }) => {
+const Fields = ({ makeMove }: { makeMove: (id: number) => void }) => {
   const { fields } = useAppSelector((state) => state.games.tictactoe);
   const dummyFields: JSX.Element[] = [];
 
@@ -22,7 +22,6 @@ const Fields = ({ makeMove }: { makeMove: (id: string) => void }) => {
           ? fields.map((field) => (
               <Field
                 key={field.id}
-                id={field.id}
                 value={field.value}
                 onClick={() => makeMove(field.id)}
               />
@@ -35,16 +34,14 @@ const Fields = ({ makeMove }: { makeMove: (id: string) => void }) => {
 
 interface FieldProps {
   onClick?: () => void;
-  id?: string;
   value?: "X" | "O";
   dummy?: boolean;
 }
 
-const Field = ({ onClick, id, value }: FieldProps) => {
+const Field = ({ onClick, value }: FieldProps) => {
   return (
     <Flex className="items-center justify-center">
       <Button
-        id={id}
         className={`h-24 w-24 flex justify-center dark:text-white text-black items-center ${
           value === "X" ? "bg-blue-500" : value === "O" && "bg-red-500"
         }`}

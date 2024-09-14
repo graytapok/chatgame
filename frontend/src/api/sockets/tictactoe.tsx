@@ -10,9 +10,10 @@ import {
   Opponent,
   opponentLeft,
   rematch,
-  Turn,
+  Symbol,
   Winner,
 } from "src/features/gamesSlice/tictactoeSlice";
+import { addMessage } from "src/features/chatSlice";
 
 export interface OnGameBeginResponse {
   symbol: string;
@@ -20,9 +21,9 @@ export interface OnGameBeginResponse {
 }
 
 interface OnMadeMoveResponse {
-  position: string;
-  symbol: Turn;
-  turn: Turn;
+  turn: Symbol;
+  position: number;
+  symbol: Symbol;
 }
 
 class TictactoeSocket {
@@ -32,7 +33,7 @@ class TictactoeSocket {
     this.socket = socket;
   }
 
-  makeMove = (id: string) => {
+  makeMove = (id: number) => {
     this.socket.emit("make_move", id);
   };
 
@@ -57,6 +58,14 @@ class TictactoeSocket {
         turn: "X",
       })
     );
+    store.dispatch(
+      addMessage({
+        type: "info",
+        message: `You and ${
+          store.getState().games.tictactoe.opponent?.username
+        } joined. The game begins!`,
+      })
+    );
   };
 
   onGameOver = (data: { winner: Winner }) => {
@@ -64,7 +73,7 @@ class TictactoeSocket {
   };
 
   onMadeMove = (data: OnMadeMoveResponse) => {
-    store.dispatch(madeMove({ ...data }));
+    store.dispatch(madeMove(data));
   };
 
   onOpponentLeft = () => {

@@ -9,7 +9,6 @@ manager = TictactoeManager()
 
 class TictactoeSocket(Namespace):
     def on_connect(self):
-
         sid = request.sid
 
         username = None
@@ -61,21 +60,7 @@ class TictactoeSocket(Namespace):
                 to=sid
             )
 
-            emit(
-                "info",
-                {"message": f"You and {player.username} joined. The game begins!"},
-                to=opponent.sid,
-                json=True
-            )
-
-            emit(
-                "info",
-                {"message": f"You and {opponent.username} joined. The game begins!"},
-                to=sid,
-                json=True
-            )
-
-    def on_message(self, message, room):
+    def on_message(self, message: str):
         sid = request.sid
 
         player = manager.get_player(sid)
@@ -86,6 +71,7 @@ class TictactoeSocket(Namespace):
         emit(
             "message",
             {
+                "type": "message",
                 "message": message,
                 "sender": player.username
             },
@@ -97,6 +83,7 @@ class TictactoeSocket(Namespace):
         emit(
             "message",
             {
+                "type": "message",
                 "message": message,
                 "sender": "You"
             },
@@ -104,7 +91,7 @@ class TictactoeSocket(Namespace):
             to=sid
         )
 
-    def on_make_move(self, move):
+    def on_make_move(self, move: int):
         sid = request.sid
 
         player = manager.get_player(sid)
@@ -112,6 +99,8 @@ class TictactoeSocket(Namespace):
         game = manager.get_game(sid)
 
         res = manager.make_move(sid, move)
+
+        ic(res)
 
         if res:
             emit(
@@ -128,7 +117,7 @@ class TictactoeSocket(Namespace):
             if "winner" in res:
                 emit("game_over", {"winner": res["winner"]}, json=True, to=room)
 
-    def on_rematch(self, decision=True):
+    def on_rematch(self, decision: bool = True):
         sid = request.sid
 
         opponent = manager.get_opponent(sid)

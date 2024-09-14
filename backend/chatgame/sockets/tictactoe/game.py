@@ -1,29 +1,26 @@
+from typing import Literal
+
+from pydantic import BaseModel
+
 possible_wins = (
-    ["1", "2", "3"],
-    ["4", "5", "6"],
-    ["7", "8", "9"],
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
 
-    ["1", "4", "7"],
-    ["2", "5", "8"],
-    ["3", "6", "9"],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
 
-    ["1", "5", "9"],
-    ["7", "5", "3"]
+    [0, 4, 8],
+    [2, 4, 6]
 )
 
-class Game:
-    def __init__(self, room):
-        self.room = room
-        self.rematch = {}
-        self.fields = {}
-        self.status = "playing"
-        self.turn = "X"
-
-        for i in range(1, 10):
-            self.fields.update({str(i): ""})
-
-    def __repr__(self):
-        return f"<Game '{self.room}' | '{self.status}'>"
+class Game(BaseModel):
+    room: str
+    rematch: dict[str, bool] = {}
+    fields: list[Literal["X", "O"] | None] = [None for i in range(0, 9)]
+    status: Literal["playing", "finished"] = "playing"
+    turn: Literal["X", "O"] | None = "X"
 
     def check_winner(self):
         for symbol in ["X", "O"]:
@@ -32,8 +29,8 @@ class Game:
                     return symbol
 
         counter = 0
-        for i in range(1, 10):
-            if self.fields[str(i)] != "":
+        for i in range(0, 9):
+            if self.fields[i]:
                 counter += 1
 
         if counter == 9:
@@ -41,14 +38,11 @@ class Game:
 
         return None
 
-    def decide_rematch(self, sid, decision):
+    def decide_rematch(self, sid: str, decision: bool):
         self.rematch.update({sid: decision})
 
     def setup_rematch(self):
         self.turn = "X"
-        self.fields = {}
+        self.fields = [None for i in range(0, 9)]
         self.status = "playing"
         self.rematch = {}
-
-        for i in range(1, 10):
-            self.fields.update({str(i): ""})

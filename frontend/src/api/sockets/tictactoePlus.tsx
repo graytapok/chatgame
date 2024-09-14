@@ -4,24 +4,34 @@ import { toast } from "react-toastify";
 
 import { store } from "src/store";
 import {
+  Opponent,
+  Turn,
+  Winner,
   gameBegin,
   gameOver,
   madeMove,
   opponentLeft,
   rematch,
+  Symbol,
+  fieldWinner,
 } from "src/features/gamesSlice/tictactoePlusSlice";
-import { Opponent, Turn, Winner } from "src/features/gamesSlice/tictactoeSlice";
+import { addMessage } from "src/features/chatSlice";
 
-export interface OnGameBeginResponse {
+interface OnGameBeginProps {
   symbol: string;
   opponent: Opponent;
 }
 
-interface OnMadeMoveResponse {
-  field: string;
-  subField: string;
-  symbol: Turn;
+interface OnMadeMoveProps {
+  field: number;
+  subField: number;
+  symbol: Symbol;
   turn: Turn;
+}
+
+interface OnFieldWinnerProps {
+  field: number;
+  symbol: Symbol;
 }
 
 class TictactoePlusSocket {
@@ -31,7 +41,7 @@ class TictactoePlusSocket {
     this.socket = socket;
   }
 
-  makeMove = (field: string, subField: string) => {
+  makeMove = (field: number, subField: number) => {
     this.socket.emit("make_move", field, subField);
   };
 
@@ -48,12 +58,20 @@ class TictactoePlusSocket {
     this.socket.emit("rematch");
   };
 
-  onGameBegin = (data: OnGameBeginResponse) => {
+  onGameBegin = (data: OnGameBeginProps) => {
     store.dispatch(
       gameBegin({
         playerSymbol: data.symbol,
         opponent: data.opponent,
-        turn: "X",
+        turn: { symbol: "X" },
+      })
+    );
+    store.dispatch(
+      addMessage({
+        type: "info",
+        message: `You and ${
+          store.getState().games.tictactoePlus.opponent?.username
+        } joined. The game begins!`,
       })
     );
   };
@@ -62,8 +80,12 @@ class TictactoePlusSocket {
     store.dispatch(gameOver({ winner: data.winner }));
   };
 
-  onMadeMove = (data: OnMadeMoveResponse) => {
-    store.dispatch(madeMove({ ...data }));
+  onMadeMove = (data: OnMadeMoveProps) => {
+    store.dispatch(madeMove(data));
+  };
+
+  onFieldWinner = (data: OnFieldWinnerProps) => {
+    store.dispatch(fieldWinner(data));
   };
 
   onOpponentLeft = () => {

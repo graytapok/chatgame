@@ -1,46 +1,44 @@
+from pydantic import BaseModel, Field as PField
+from typing import Literal
+
 possible_wins = (
-    ["1", "2", "3"],
-    ["4", "5", "6"],
-    ["7", "8", "9"],
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
 
-    ["1", "4", "7"],
-    ["2", "5", "8"],
-    ["3", "6", "9"],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
 
-    ["1", "5", "9"],
-    ["7", "5", "3"]
+    [0, 4, 8],
+    [2, 4, 6]
 )
 
-class Game:
-    def __init__(self, room):
-        self.room = room
-        self.rematch = {}
-        self.fields = {}
-        self.status = "playing"
-        self.turn = "X"
+class Turn(BaseModel):
+    symbol: Literal["X", "O"]
+    field: int | None = PField(ge=0, le=8)
 
-        for i in range(1, 10):
-            child_fields = {}
-            for j in range(1, 10):
-                child_fields.update({str(j): ""})
+class Field(BaseModel):
+    id: int
+    value: Literal["X", "O"] | None = None
+    sub_fields: list[Literal["X", "O"] | None] = PField([None for i in range(0, 9)], repr=False)
 
-            self.fields.update({str(i): {
-                "value": "",
-                "fields": child_fields
-            }})
-
-    def __repr__(self):
-        return f"<Game '{self.room}' | '{self.status}'>"
+class Game(BaseModel):
+    room: str
+    rematch: dict[str, bool] = {}
+    fields: list[Field] = PField([Field(id=i) for i in range(0, 9)], repr=False)
+    status: Literal["playing", "finished"] = "playing"
+    turn: Turn = Turn(symbol="X", field=None)
 
     def check_winner(self):
         for symbol in ["X", "O"]:
             for i in possible_wins:
-                if self.fields[i[0]]["value"] == self.fields[i[1]]["value"] == self.fields[i[2]]["value"] == symbol:
+                if self.fields[i[0]].value == self.fields[i[1]].value == self.fields[i[2]].value == symbol:
                     return symbol
 
         counter = 0
-        for i in range(1, 10):
-            if self.fields[str(i)]["value"] != "":
+        for i in range(0, 9):
+            if self.fields[i].value:
                 counter += 1
 
         if counter == 9:
@@ -48,15 +46,18 @@ class Game:
 
         return None
 
-    def check_fields(self):
+    def check_field(self, field: int):
         for symbol in ["X", "O"]:
             for i in possible_wins:
-                if self.fields[i[0]]["fields"] == self.fields[i[1]]["fields"] == self.fields[i[2]]["fields"] == symbol:
+                if (self.fields[field].sub_fields[i[0]]
+                        == self.fields[field].sub_fields[i[1]]
+                        == self.fields[field].sub_fields[i[2]]
+                        == symbol):
                     return symbol
 
         counter = 0
-        for i in range(1, 10):
-            if self.fields[str(i)]["fields"] != "":
+        for i in range(0, 9):
+            if self.fields[field].sub_fields[i]:
                 counter += 1
 
         if counter == 9:
@@ -64,21 +65,11 @@ class Game:
 
         return None
 
-    def decide_rematch(self, sid, decision):
+    def decide_rematch(self, sid: str, decision: bool):
         self.rematch.update({sid: decision})
 
     def setup_rematch(self):
-        self.turn = "X"
-        self.fields = {}
+        self.turn = Turn(symbol="X", field=None)
+        self.fields = [Field(id=i) for i in range(0, 9)]
         self.status = "playing"
         self.rematch = {}
-
-        for i in range(1, 10):
-            child_fields = {}
-            for j in range(1, 10):
-                child_fields.update({str(j): ""})
-
-            self.fields.update({str(i): {
-                "value": "",
-                "fields": child_fields
-            }})

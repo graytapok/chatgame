@@ -1,7 +1,7 @@
 import Chat from "src/components/Chat";
 
 function TestChat() {
-  return <Chat room="1" />;
+  return <Chat />;
 }
 
 export default TestChat;

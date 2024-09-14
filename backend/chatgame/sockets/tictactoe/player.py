@@ -1,13 +1,11 @@
-class Player:
-    def __init__(self, sid, username, opponent_id, room=None):
-        self.sid = sid
-        self.room = room
-        self.username = username
-        self.opponent_id = opponent_id
-        self.symbol = "X"
+from typing import Literal
 
-    def set_room(self, room):
-        self.room = room
+from pydantic import BaseModel
 
-    def __repr__(self):
-        return f"<Player '{self.username}' | '{self.sid}'>"
+
+class Player(BaseModel):
+    sid: str
+    room: str | None = None
+    username: str
+    opponent_id: str | None
+    symbol: Literal["X", "O"] = "X"

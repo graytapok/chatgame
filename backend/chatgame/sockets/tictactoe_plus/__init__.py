@@ -57,21 +57,7 @@ class TictactoePlusSocket(Namespace):
                 to=sid
             )
 
-            emit(
-                "info",
-                {"message": f"You and {player.username} joined. The game begins!"},
-                to=opponent.sid,
-                json=True
-            )
-
-            emit(
-                "info",
-                {"message": f"You and {opponent.username} joined. The game begins!"},
-                to=sid,
-                json=True
-            )
-
-    def on_message(self, message):
+    def on_message(self, message: str):
         sid = request.sid
 
         player = manager.get_player(sid)
@@ -82,6 +68,7 @@ class TictactoePlusSocket(Namespace):
         emit(
             "message",
             {
+                "type": "message",
                 "message": message,
                 "sender": player.username
             },
@@ -93,6 +80,7 @@ class TictactoePlusSocket(Namespace):
         emit(
             "message",
             {
+                "type": "message",
                 "message": message,
                 "sender": "You"
             },
@@ -100,7 +88,7 @@ class TictactoePlusSocket(Namespace):
             to=sid
         )
 
-    def on_make_move(self, field, sub_field):
+    def on_make_move(self, field: int, sub_field: int):
         sid = request.sid
 
         player = manager.get_player(sid)
@@ -110,28 +98,33 @@ class TictactoePlusSocket(Namespace):
         res = manager.make_move_plus(sid, field, sub_field)
 
         if res:
-            emit(
-                "made_move",
-                {"field": field, "subField": sub_field, "symbol": player.symbol, "turn": game.turn},
-                json=True,
-                room=room
-            )
+            if "made_move" in res:
+                emit(
+                    "made_move",
+                    {
+                        "field": field,
+                        "subField": sub_field,
+                        "symbol": player.symbol,
+                        "turn": game.turn.model_dump()
+                    },
+                    json=True,
+                    room=room
+                )
 
             if "field_winner" in res:
-                if "symbol" in res["field_winner"]:
-                    emit(
-                        "field_winner",
-                        {
-                            "field": res["field_winner"]["field"],
-                            "symbol": res["field_winner"]["symbol"]
-                        },
-                        json=True,
-                        to=room)
+                emit(
+                    "field_winner",
+                    {
+                        "field": field,
+                        "symbol": player.symbol
+                    },
+                    json=True,
+                    to=room)
 
             if "winner" in res:
                 emit("game_over", {"winner": res["winner"]}, json=True, to=room)
 
-    def on_rematch(self, decision=True):
+    def on_rematch(self, decision: bool = True):
         sid = request.sid
 
         opponent = manager.get_opponent(sid)

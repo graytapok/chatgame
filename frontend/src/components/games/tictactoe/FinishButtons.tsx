@@ -6,10 +6,17 @@ import { LuSwords } from "react-icons/lu";
 import { useAppDispatch, useAppSelector } from "src/hooks";
 import Button from "src/components/ui/Button";
 import { nextGame } from "src/features/gamesSlice/tictactoeSlice";
+import { nextGame as nextGamePlus } from "src/features/gamesSlice/tictactoePlusSlice";
 
-const FinishButtons = ({ requestRematch }: { requestRematch: () => void }) => {
-  const { status, opponent, rematch } = useAppSelector(
-    (state) => state.games.tictactoe
+const FinishButtons = ({
+  requestRematch,
+  plus = false,
+}: {
+  plus?: boolean;
+  requestRematch: () => void;
+}) => {
+  const { status, opponent, rematch } = useAppSelector((state) =>
+    plus ? state.games.tictactoePlus : state.games.tictactoe
   );
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -35,7 +42,11 @@ const FinishButtons = ({ requestRematch }: { requestRematch: () => void }) => {
             </Button>
           )}
 
-          <Button onClick={() => dispatch(nextGame())}>
+          <Button
+            onClick={() =>
+              plus ? dispatch(nextGamePlus()) : dispatch(nextGame())
+            }
+          >
             <ReloadIcon />
             Next Game
           </Button>

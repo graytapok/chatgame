@@ -1,5 +1,7 @@
 from random import randint
 
+from pydantic import BaseModel
+
 from chatgame.sockets.tictactoe.game import Game
 from chatgame.sockets.tictactoe.player import Player
 
@@ -16,24 +18,23 @@ possible_wins = (
     ["7", "5", "3"]
 )
 
-class TictactoeManager:
-    def __init__(self):
-        self.unmatched_player_id = None
-        self.players = {}
-        self.games = {}
+class TictactoeManager(BaseModel):
+    unmatched_player_id: str | None = None
+    players: dict[str, Player] = {}
+    games: dict[str, Game] = {}
 
-    def add_player(self, sid, username):
+    def add_player(self, sid: str, username: str):
         if not username:
             username = f"Guest{randint(1000, 9999)}"
 
         self.players.update({
-            sid: Player(sid, username, self.unmatched_player_id)
+            sid: Player(sid=sid, username=username, opponent_id=self.unmatched_player_id)
         })
 
         if self.unmatched_player_id is None:
             self.unmatched_player_id = sid
 
-    def setup_game(self, sid):
+    def setup_game(self, sid: str):
         if sid not in self.players:
             return
 
@@ -52,10 +53,10 @@ class TictactoeManager:
         self.players[opponent.sid].room = room
 
         self.games.update({
-            room: Game(room)
+            room: Game(room=room)
         })
 
-    def make_move(self, sid, move):
+    def make_move(self, sid: str, move: int):
         player = self.get_player(sid)
         opponent = self.get_opponent(sid)
         game = self.get_game(sid)
@@ -63,7 +64,7 @@ class TictactoeManager:
         if not opponent:
             return
 
-        if int(move) < 1 or int(move) > 9:
+        if move < 0 or move > 8:
             return
 
         if game.check_winner():
@@ -74,19 +75,15 @@ class TictactoeManager:
 
         game.turn = "X" if player.symbol == "O" else "O"
 
-        game.fields.update({
-            move: player.symbol
-        })
+        game.fields[move] = player.symbol
 
-        winner = game.check_winner()
-
-        if winner:
+        if winner := game.check_winner():
             game.status = "finished"
             return {"winner": winner}
 
         return {"success": True}
 
-    def rematch(self, sid, decision):
+    def rematch(self, sid: str, decision: bool):
         player = self.get_player(sid)
         opponent = self.get_opponent(sid)
         game = self.get_game(sid)
@@ -117,7 +114,7 @@ class TictactoeManager:
 
         return
 
-    def disconnect(self, sid):
+    def disconnect(self, sid: str):
         opponent = self.get_opponent(sid)
         game = self.get_game(sid)
 
@@ -140,7 +137,7 @@ class TictactoeManager:
 
         return res
 
-    def get_opponent(self, sid) -> None | Player:
+    def get_opponent(self, sid: str):
         if sid not in self.players:
             return
 
@@ -151,17 +148,17 @@ class TictactoeManager:
 
         return None
 
-    def get_player(self, sid) -> None | Player:
+    def get_player(self, sid: str):
         if sid not in self.players:
             return
         return self.players[sid]
 
-    def get_room(self, sid) -> None | str:
+    def get_room(self, sid: str):
         if sid not in self.players:
             return
         return self.players[sid].room
 
-    def get_game(self, sid) -> None | Game:
+    def get_game(self, sid: str):
         if sid not in self.players:
             return
 

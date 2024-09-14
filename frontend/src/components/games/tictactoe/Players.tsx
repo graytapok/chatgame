@@ -1,10 +1,10 @@
 import { Flex, Text, Button } from "@radix-ui/themes";
 import { useAppSelector } from "src/hooks";
 
-const Players = () => {
+const Players = ({ plus = false }: { plus?: boolean }) => {
   const user = useAppSelector((state) => state.user);
-  const { playerSymbol, opponent } = useAppSelector(
-    (state) => state.games.tictactoe
+  const { playerSymbol, opponent } = useAppSelector((state) =>
+    plus ? state.games.tictactoePlus : state.games.tictactoe
   );
   return (
     <Flex className="text-center justify-center m-4 gap-3">

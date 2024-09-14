@@ -7,19 +7,19 @@ export interface Opponent {
 }
 
 export interface Field {
-  id: string;
-  value?: Turn;
+  id: number;
+  value?: Symbol;
 }
 
 export type Winner = "draw" | "X" | "O";
 
-export type Turn = "X" | "O";
+export type Symbol = "X" | "O";
 
 export interface TictactoeState {
   playerSymbol: string;
   opponent: Opponent;
   status: "searching" | "active" | "finished";
-  turn: Turn;
+  turn: Symbol;
   fields: Field[];
   winner: Winner;
   rematch: "requested" | "accepted" | "rejected" | "recieved";
@@ -29,7 +29,7 @@ export interface TictactoeState {
 export interface GameBeginProps {
   playerSymbol: string;
   opponent: Opponent;
-  turn: Turn;
+  turn: Symbol;
 }
 
 export interface RematchProps {
@@ -37,9 +37,9 @@ export interface RematchProps {
 }
 
 interface MadeMoveProps {
-  turn: Turn;
-  position: string;
-  symbol: Turn;
+  turn: Symbol;
+  position: number;
+  symbol: Symbol;
 }
 
 const initialState: Partial<TictactoeState> = {};
@@ -55,8 +55,8 @@ export const tictactoeSlice = createSlice({
       state.status = "active";
       state.fields = [];
 
-      for (let i = 1; i < 10; i++) {
-        state.fields.push({ id: i.toString() });
+      for (let i = 0; i < 9; i++) {
+        state.fields.push({ id: i });
       }
     },
     gameOver: (state, { payload: p }: PayloadAction<{ winner: Winner }>) => {
@@ -66,11 +66,8 @@ export const tictactoeSlice = createSlice({
     madeMove: (state, { payload: p }: PayloadAction<MadeMoveProps>) => {
       state.turn = p.turn;
 
-      for (let i = 0; i < 10; i++) {
-        if (state.fields && state.fields[i].id === p.position) {
-          state.fields[i].value = p.symbol;
-          break;
-        }
+      if (state.fields?.[p.position].id === p.position) {
+        state.fields[p.position].value = p.symbol;
       }
     },
     opponentLeft: (state) => {
@@ -101,8 +98,8 @@ export const tictactoeSlice = createSlice({
           state.turn = "X";
           state.fields = [];
 
-          for (let i = 1; i < 10; i++) {
-            state.fields.push({ id: i.toString() });
+          for (let i = 0; i < 9; i++) {
+            state.fields.push({ id: i });
           }
 
           if (state.opponent) {

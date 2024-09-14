@@ -55,7 +55,7 @@ function Tictactoe() {
       <Flex justify="center" gap="6" className="h-[400px]">
         <Fields makeMove={socket.makeMove} />
         <Chat
-          namespace="/tictactoe"
+          socket={socketListener}
           loading={
             tictactoe.status === "searching" || tictactoe.status === undefined
           }
