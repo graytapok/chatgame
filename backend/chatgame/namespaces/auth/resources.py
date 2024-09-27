@@ -13,28 +13,28 @@ from chatgame.database.models import User
 from chatgame.database.models.user import user_validation
 from chatgame.database.schemas import UserSchema
 
-from ..auth import auth_ns
+from ..auth import ns
 from .parser import *
 from .models import *
 
 
 class Default(Resource):
     @login_required
-    @auth_ns.doc(description="Get current user")
-    @auth_ns.response(200, "Success", one_user_model)
-    @auth_ns.response(401, "Unauthorized", login_required_model)
+    @ns.doc(description="Get current user")
+    @ns.response(200, "Success", one_user_model)
+    @ns.response(401, "Unauthorized", login_required_model)
     def get(self):
         return {"user": UserSchema().dump(current_user)}, 200
 
 
 class Login(Resource):
     @no_login_required
-    @auth_ns.expect(login_parser)
-    @auth_ns.doc(description="Login user")
-    @auth_ns.response(200, "Success")
-    @auth_ns.response(400, "Bad request", invalid_input_model)
-    @auth_ns.response("403 (1)", "Forbidden", no_login_required_model)
-    @auth_ns.response("403 (2)", "Forbidden", email_required_model)
+    @ns.expect(login_parser)
+    @ns.doc(description="Login user")
+    @ns.response(200, "Success")
+    @ns.response(400, "Bad request", invalid_input_model)
+    @ns.response("403 (1)", "Forbidden", no_login_required_model)
+    @ns.response("403 (2)", "Forbidden", email_required_model)
     def post(self):
         args = login_parser.parse_args()
 
@@ -51,9 +51,9 @@ class Login(Resource):
 
 class Logout(Resource):
     @login_required
-    @auth_ns.doc(description="Logout user")
-    @auth_ns.response(200, "Success")
-    @auth_ns.response(401, "Unauthorized", login_required_model)
+    @ns.doc(description="Logout user")
+    @ns.response(200, "Success")
+    @ns.response(401, "Unauthorized", login_required_model)
     def get(self):
         logout_user()
         return {}, 200
@@ -61,11 +61,11 @@ class Logout(Resource):
 
 class Register(Resource):
     @no_login_required
-    @auth_ns.expect(register_parser)
-    @auth_ns.doc(description="Register user")
-    @auth_ns.response(201, "Created")
-    @auth_ns.response(400, "Bad request", validation_model)
-    @auth_ns.response(403, "Forbidden", no_login_required_model)
+    @ns.expect(register_parser)
+    @ns.doc(description="Register user")
+    @ns.response(201, "Created")
+    @ns.response(400, "Bad request", validation_model)
+    @ns.response(403, "Forbidden", no_login_required_model)
     def post(self):
         json = register_parser.parse_args()
 
@@ -93,13 +93,13 @@ class Register(Resource):
 
 class ConfirmEmail(Resource):
     @no_login_required
-    @auth_ns.expect(email_parser)
-    @auth_ns.doc(description="Confirm user email")
-    @auth_ns.response(200, "Success")
-    @auth_ns.response(400, "Bad Request", invalid_input_model)
-    @auth_ns.response(403, "Forbidden", no_login_required_model)
-    @auth_ns.response(404, "Not Found", user_not_found_model)
-    @auth_ns.response(410, "Expired", token_expired_model)
+    @ns.expect(email_parser)
+    @ns.doc(description="Confirm user email")
+    @ns.response(200, "Success")
+    @ns.response(400, "Bad Request", invalid_input_model)
+    @ns.response(403, "Forbidden", no_login_required_model)
+    @ns.response(404, "Not Found", user_not_found_model)
+    @ns.response(410, "Expired", token_expired_model)
     def get(self):
         args = email_parser.parse_args()
 
@@ -135,12 +135,12 @@ class ConfirmEmail(Resource):
 
 class ResendConfirmEmail(Resource):
     @no_login_required
-    @auth_ns.expect(resend_parser)
-    @auth_ns.doc(description="Resend confirm email")
-    @auth_ns.response(200, "Success")
-    @auth_ns.response(400, "Bad Request", validation_model)
-    @auth_ns.response(403, "Forbidden", no_login_required_model)
-    @auth_ns.response(404, "Not Found", user_not_found_model)
+    @ns.expect(resend_parser)
+    @ns.doc(description="Resend confirm email")
+    @ns.response(200, "Success")
+    @ns.response(400, "Bad Request", validation_model)
+    @ns.response(403, "Forbidden", no_login_required_model)
+    @ns.response(404, "Not Found", user_not_found_model)
     def post(self):
         json = resend_parser.parse_args()
 
@@ -159,11 +159,11 @@ class ResendConfirmEmail(Resource):
 
 
 class ForgotPassword(Resource):
-    @auth_ns.expect(forgot_parser)
-    @auth_ns.doc(description="Forgot password")
-    @auth_ns.response(200, "Success")
-    @auth_ns.response(400, "Bad Request", validation_model)
-    @auth_ns.response(404, "Not Found", user_not_found_model)
+    @ns.expect(forgot_parser)
+    @ns.doc(description="Forgot password")
+    @ns.response(200, "Success")
+    @ns.response(400, "Bad Request", validation_model)
+    @ns.response(404, "Not Found", user_not_found_model)
     def post(self):
         json = forgot_parser.parse_args()
 
@@ -179,13 +179,13 @@ class ForgotPassword(Resource):
         return {}
 
 class ChangePassword(Resource):
-    @auth_ns.expect(change_parser)
-    @auth_ns.doc(description="Change password")
-    @auth_ns.response(200, "Success")
-    @auth_ns.response(400, "Bad Request", validation_model)
-    @auth_ns.response(403, "Forbidden", email_required_model)
-    @auth_ns.response(404, "Not Found", user_not_found_model)
-    @auth_ns.response(410, "Expired", token_expired_model)
+    @ns.expect(change_parser)
+    @ns.doc(description="Change password")
+    @ns.response(200, "Success")
+    @ns.response(400, "Bad Request", validation_model)
+    @ns.response(403, "Forbidden", email_required_model)
+    @ns.response(404, "Not Found", user_not_found_model)
+    @ns.response(410, "Expired", token_expired_model)
     def post(self):
         args = change_parser.parse_args()
 

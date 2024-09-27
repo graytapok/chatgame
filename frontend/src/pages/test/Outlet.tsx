@@ -1,5 +1,6 @@
-import { Heading, SegmentedControl } from "@radix-ui/themes";
+import { SegmentedControl } from "@radix-ui/themes";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
+import PageHeading from "src/components/PageHeading";
 
 const pages: string[] = ["query", "fetch", "chat"];
 
@@ -8,9 +9,7 @@ function TestOutlet() {
   const { "*": param } = useParams();
   return (
     <>
-      <Heading size="7" className="mt-3 ml-3">
-        Test
-      </Heading>
+      <PageHeading title="Test" text="Self build tool for the developer." />
       <SegmentedControl.Root defaultValue={param || "query"} className="m-4">
         {pages.map((page) => (
           <SegmentedControl.Item

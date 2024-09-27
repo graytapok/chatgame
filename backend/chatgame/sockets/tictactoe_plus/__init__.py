@@ -6,7 +6,7 @@ from .manager import TictactoePlusManager
 
 manager = TictactoePlusManager()
 
-class TictactoePlusSocket(Namespace):
+class Socket(Namespace):
     def on_connect(self):
         sid = request.sid
 

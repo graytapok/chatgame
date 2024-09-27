@@ -1,6 +1,5 @@
 from flask_login import UserMixin
 
-from mongoengine import ReferenceField
 from email_validator import validate_email
 from werkzeug.security import generate_password_hash, check_password_hash
 

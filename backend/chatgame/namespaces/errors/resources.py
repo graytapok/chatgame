@@ -3,18 +3,18 @@ from flask_restx import marshal
 from chatgame.utils import errors
 from chatgame.utils.models import *
 
-from ..errors import errors_ns
+from ..errors import ns
 
-@errors_ns.errorhandler(errors.LoginRequired)
+@ns.errorhandler(errors.LoginRequired)
 def error(e):
     return marshal({}, login_required_model), 401
 
-@errors_ns.errorhandler(errors.NoLoginRequired)
+@ns.errorhandler(errors.NoLoginRequired)
 def error(e):
     return marshal({}, no_login_required_model), 403
 
-@errors_ns.errorhandler(errors.InvalidInput)
-@errors_ns.marshal_with(invalid_input_model, skip_none=True)
+@ns.errorhandler(errors.InvalidInput)
+@ns.marshal_with(invalid_input_model, skip_none=True)
 def error(e):
     invalid_input_error = {}
     if len(e.__dict__) != 0:
@@ -23,7 +23,7 @@ def error(e):
                 invalid_input_error.update({i: e.__dict__[i]})
     return {"errors": invalid_input_error if len(e.__dict__) != 0 else None}, 400
 
-@errors_ns.errorhandler(errors.ValidationError)
+@ns.errorhandler(errors.ValidationError)
 def error(e):
     message = e.message if e.message else "validation failed"
     e_errors = e.to_dict()

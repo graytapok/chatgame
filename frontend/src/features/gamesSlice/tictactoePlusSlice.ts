@@ -96,7 +96,6 @@ export const tictactoePlusSlice = createSlice({
       }
     },
     fieldWinner: (state, { payload: p }: PayloadAction<FieldWinnerProps>) => {
-      console.log(state.fields?.[p.field]);
       if (state.fields?.[p.field]) {
         state.fields[p.field].value = p.symbol;
       }

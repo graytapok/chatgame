@@ -6,7 +6,7 @@ from .manager import ChatManager
 
 manager = ChatManager()
 
-class ChatSocket(Namespace):
+class Socket(Namespace):
     def on_connect(self):
         pass
 

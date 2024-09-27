@@ -44,21 +44,20 @@ def create_app(test: bool = False):
     login.init_app(app)
     socketio.init_app(app)
 
-    from chatgame import namespaces, sockets
+    from chatgame.namespaces import auth, errors, rooms
 
-    app.register_blueprint(namespaces.errors_bp)
+    app.register_blueprint(errors.bp)
+    app.register_blueprint(rooms.bp)
 
-    api.add_namespace(namespaces.errors_ns)
-    api.add_namespace(namespaces.auth_ns, path="/auth")
+    api.add_namespace(errors.ns)
+    api.add_namespace(auth.ns, path="/auth")
 
     with app.app_context():
-        socketio.on_namespace(sockets.ChatSocket(namespace="/chat"))
-        socketio.on_namespace(sockets.TictactoeSocket(namespace="/tictactoe"))
-        socketio.on_namespace(sockets.TictactoePlusSocket(namespace="/tictactoe_plus"))
+        from chatgame.sockets import tictactoe_plus, chat, tictactoe
 
-    @app.shell_context_processor
-    def shell():
-        return {"db": db, "models": models}
+        socketio.on_namespace(chat.Socket(namespace="/chat"))
+        socketio.on_namespace(tictactoe.Socket(namespace="/tictactoe"))
+        socketio.on_namespace(tictactoe_plus.Socket(namespace="/tictactoe_plus"))
 
     @app.route('/favicon.ico')
     def favicon():

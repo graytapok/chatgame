@@ -7,7 +7,7 @@ from .manager import TictactoeManager
 manager = TictactoeManager()
 
 
-class TictactoeSocket(Namespace):
+class Socket(Namespace):
     def on_connect(self):
         sid = request.sid
 
@@ -99,8 +99,6 @@ class TictactoeSocket(Namespace):
         game = manager.get_game(sid)
 
         res = manager.make_move(sid, move)
-
-        ic(res)
 
         if res:
             emit(
