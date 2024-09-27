@@ -44,10 +44,9 @@ def create_app(test: bool = False):
     login.init_app(app)
     socketio.init_app(app)
 
-    from chatgame.namespaces import auth, errors, rooms
+    from chatgame.namespaces import auth, errors
 
     app.register_blueprint(errors.bp)
-    app.register_blueprint(rooms.bp)
 
     api.add_namespace(errors.ns)
     api.add_namespace(auth.ns, path="/auth")
