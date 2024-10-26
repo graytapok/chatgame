@@ -1,20 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { store } from "src/store";
 import { apiClient } from "src/api";
 import { login, logout } from "src/features/userSlice";
-import { store } from "src/store";
 
 const getAuth = async () => {
-  const response = await apiClient
-    .get("/auth/")
-    .catch(() => store.dispatch(logout()));
-
-  if ("data" in response) {
-    store.dispatch(login(response.data.user));
-    return response.data;
+  try {
+    const res = await apiClient.get("/users/me");
+    store.dispatch(login(res.data));
+    return res;
+  } catch (error) {
+    store.dispatch(logout());
+    throw error;
   }
-
-  return {};
 };
 
 export const useAuth = () => {
@@ -24,5 +22,17 @@ export const useAuth = () => {
     retry: false,
     enabled: true,
     retryDelay: 0,
+  });
+};
+
+const getTest = async () => {
+  return await apiClient.get("/users/me");
+};
+
+export const useTest = () => {
+  return useQuery({
+    queryKey: ["test"],
+    queryFn: getTest,
+    retry: false,
   });
 };

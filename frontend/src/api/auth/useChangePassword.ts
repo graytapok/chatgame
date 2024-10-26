@@ -2,8 +2,7 @@ import { apiClient } from "..";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface ChangePasswordProps {
-  newPassword: string;
-  confirmPassword: string;
+  password: string;
   userHash?: string;
   token?: string;
 }
@@ -13,15 +12,13 @@ const postForgotPasswordChange = async (params: ChangePasswordProps) => {
     const res = await apiClient.post(
       `/auth/change_password?u=${params.userHash}&t=${params.token}`,
       {
-        newPassword: params.newPassword,
-        confirmPassword: params.confirmPassword,
+        password: params.password,
       }
     );
     return res.data;
   } else {
     const res = await apiClient.post(`/auth/change_password`, {
-      newPassword: params.newPassword,
-      confirmPassword: params.confirmPassword,
+      password: params.password,
     });
     return res.data;
   }

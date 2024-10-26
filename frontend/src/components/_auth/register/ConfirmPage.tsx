@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosError } from "axios";
 import { useContext, useEffect, useState } from "react";
 import { EnterIcon, HomeIcon } from "@radix-ui/react-icons";
 import { Blockquote } from "@radix-ui/themes";
@@ -12,50 +12,52 @@ function ConfirmRegister() {
   const fetchConfirm = useContext(RegisterContext);
   const navigate = useNavigate();
 
-  const [error, setError] = useState("");
+  const [status, setStatus] = useState<number>();
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (fetchConfirm?.isError) {
-      const res = fetchConfirm?.error as AxiosError;
-      if (res.response !== undefined) {
-        const apiError = res.response as AxiosResponse;
-        setError(apiError.data.message);
-      }
+      const res = fetchConfirm.error as AxiosError;
+      setStatus(res.response?.status);
     }
-    if (error) {
-      switch (error) {
-        case "token expired":
-          setErrorMessage(
-            "Your token has expired. Please recheck your email inbox for the most recent confirmation email or try again by clicking the button below."
-          );
-          break;
-        case "no login required":
-          setErrorMessage("Your email is already confirmed!");
-          break;
-        case "invalid input":
-          setErrorMessage("The search params of your url are invalid.");
-          break;
-        default:
-          setErrorMessage("Something went wrong...");
-          break;
-      }
+  }, [fetchConfirm]);
+
+  useEffect(() => {
+    switch (status) {
+      case 410:
+        setErrorMessage(
+          "Your token has expired. Please recheck your email inbox for the most recent confirmation email or try again by clicking the button below."
+        );
+        break;
+
+      case 403:
+        setErrorMessage("The email is already confirmed!");
+        break;
+
+      case 400:
+      case 404:
+        setErrorMessage("Invalid token.");
+        break;
+
+      default:
+        setErrorMessage("Something went wrong...");
+        break;
     }
-  }, [fetchConfirm, error]);
+  }, [status]);
 
   return (
-    <CenterCard heading={error ? "Something went wrong!" : "Done!"}>
+    <CenterCard heading={status ? "Something went wrong!" : "Done!"}>
       <Blockquote size="5">
-        {error
+        {status
           ? errorMessage
           : "Your email has been successfully confirmed. You are also automatically logged in!"}
       </Blockquote>
 
-      {error === "token expired" ? (
+      {status === 410 ? (
         <Button onClick={() => navigate("/resend")}>
           Resend confirmation email
         </Button>
-      ) : error === "no login required" ? (
+      ) : status === 401 ? (
         <Button onClick={() => navigate("/login")}>
           <EnterIcon />
           Login

@@ -19,12 +19,12 @@ function Buttons() {
     setError(null);
 
     try {
-      const response = await fetch("/api/auth/", {
+      const response = await fetch("/api/users/me", {
         signal: abortControllerRef.current?.signal,
       });
       const json = await response.json();
       if (response.status === 200) {
-        const resUser = json.user as User;
+        const resUser = json as User;
         setUser(resUser);
       } else {
         setMessage(json.message);

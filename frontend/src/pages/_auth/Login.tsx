@@ -1,17 +1,8 @@
 import { AxiosError, AxiosResponse } from "axios";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Flex, Checkbox, Text, Callout } from "@radix-ui/themes";
 import {
-  Flex,
-  TextField,
-  Checkbox,
-  Text,
-  Callout,
-  IconButton,
-} from "@radix-ui/themes";
-import {
-  EyeNoneIcon,
-  EyeOpenIcon,
   InfoCircledIcon,
   LockClosedIcon,
   PersonIcon,
@@ -21,6 +12,7 @@ import { useLogin } from "src/api/auth";
 import Link from "src/components/ui/Link";
 import Button from "src/components/ui/Button";
 import CenterCard from "src/components/ui/CenterCard";
+import InputField from "src/components/InputField";
 
 function Login() {
   const fetchLogin = useLogin();
@@ -29,16 +21,11 @@ function Login() {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
-  const [passwordVisible, setPasswordVisibility] = useState(false);
 
   const toggleRemember = () => setRemember(!remember);
 
   const handleLogin = () => {
     fetchLogin.mutate({ login, password, remember });
-  };
-
-  const togglePasswordVisibility = () => {
-    setPasswordVisibility(!passwordVisible);
   };
 
   useEffect(() => {
@@ -47,10 +34,11 @@ function Login() {
     }
     if (fetchLogin.isError) {
       const res = fetchLogin.error as AxiosError;
-      if (res.response !== undefined) {
+
+      if (res.response) {
         const apiError = res.response as AxiosResponse;
-        const apiData = apiError.data.message;
-        if (apiData === "email must be confirmed") {
+        const apiData = apiError.data.detail;
+        if (apiData === "Email is not confirmed") {
           navigate("/resend?m=email");
         }
       }
@@ -59,39 +47,21 @@ function Login() {
 
   return (
     <CenterCard heading="Login">
-      <TextField.Root
-        size="3"
+      <InputField
         placeholder="Login"
-        variant="surface"
-        onChange={(e) => setLogin(e.target.value)}
-        className="outline-1"
-      >
-        <TextField.Slot>
-          <PersonIcon height="16" width="16" />
-        </TextField.Slot>
-      </TextField.Root>
+        onChange={setLogin}
+        value={login || ""}
+        type="text"
+        icon={<PersonIcon height="16" width="16" />}
+      />
 
-      <TextField.Root
-        size="3"
+      <InputField
         placeholder="Password"
-        type={passwordVisible ? undefined : "password"}
-        onChange={(e) => setPassword(e.target.value)}
-        className="outline-1"
-      >
-        <TextField.Slot>
-          <LockClosedIcon height="16" width="16" />
-        </TextField.Slot>
-        <TextField.Slot>
-          <IconButton
-            variant="ghost"
-            color="gray"
-            className="hover:cursor-pointer"
-            onClick={togglePasswordVisibility}
-          >
-            {passwordVisible ? <EyeOpenIcon /> : <EyeNoneIcon />}
-          </IconButton>
-        </TextField.Slot>
-      </TextField.Root>
+        value={password || ""}
+        onChange={setPassword}
+        type="password"
+        icon={<LockClosedIcon height="16" width="16" />}
+      />
 
       {fetchLogin.isError && (
         <Callout.Root color="red" variant="surface" size="1" className="mb-2">

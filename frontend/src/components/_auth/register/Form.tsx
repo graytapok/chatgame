@@ -5,62 +5,95 @@ import {
   PersonIcon,
   LockOpen1Icon,
   EnvelopeClosedIcon,
-  EyeOpenIcon,
-  EyeNoneIcon,
   InfoCircledIcon,
 } from "@radix-ui/react-icons";
-import { Callout, Flex, IconButton, TextField } from "@radix-ui/themes";
+import { Callout, Flex } from "@radix-ui/themes";
 
 import Button from "src/components/ui/Button";
 import { useRegister } from "src/api/auth";
 import Link from "src/components/ui/Link";
 import CenterCard from "src/components/ui/CenterCard";
+import InputField from "../../InputField";
+import { ApiValidationError } from "src/types/api";
 
-interface ErrorResponse {
-  message: string;
-  errors: Error;
-}
+type ErrorType = "required" | "not unique" | "rules";
 
-interface Error {
-  username?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
+interface Errors {
+  username?: ErrorType;
+  email?: ErrorType;
+  password?: ErrorType;
+  confirmPassword?: ErrorType;
 }
 
 function RegisterForm() {
   const fetchRegister = useRegister();
 
-  const [error, setError] = useState<Error>({});
+  const [errors, setErrors] = useState<Errors>({});
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [passwordVisible, setPasswordVisibility] = useState(false);
-  const [confirmPasswordVisible, setConfirmPasswordVisibility] =
-    useState(false);
-
-  const togglePasswordVisibility = () => {
-    setPasswordVisibility(!passwordVisible);
-  };
-
-  const toggleConfirmPasswordVisibility = () => {
-    setConfirmPasswordVisibility(!confirmPasswordVisible);
-  };
-
   const handleRegister = () => {
-    fetchRegister.mutate({ username, email, password, confirmPassword });
+    if (!username) {
+      errors.username = "required";
+    } else {
+      delete errors.username;
+    }
+
+    if (!email) {
+      errors.email = "required";
+    } else {
+      delete errors.email;
+    }
+
+    if (!password) {
+      errors.password = "required";
+    } else {
+      delete errors.password;
+    }
+
+    if (confirmPassword != password) {
+      errors.confirmPassword = "required";
+    } else {
+      delete errors.confirmPassword;
+    }
+
+    setErrors({ ...errors });
+
+    if (Object.keys(errors).length === 0) {
+      fetchRegister.mutate({ username, email, password });
+    }
   };
 
   useEffect(() => {
     if (fetchRegister.isError) {
       const res = fetchRegister.error as AxiosError;
-      if (res.response !== undefined) {
+
+      if (res.response) {
         const apiError = res.response as AxiosResponse;
-        const data = apiError.data as ErrorResponse;
-        setError(data.errors);
+        const data = apiError.data;
+
+        if (apiError.status == 400) {
+          if ("validation_error" in data) {
+            const list: ApiValidationError[] =
+              data["validation_error"]["body_params"];
+
+            list.forEach((e) => {
+              if (e.loc.includes("username")) errors.username = "rules";
+              if (e.loc.includes("password")) errors.password = "rules";
+              if (e.loc.includes("email")) errors.email = "rules";
+            });
+
+            setErrors({ ...errors });
+          }
+          if ("detail" in data) {
+            if ("username" in data["detail"]) errors.username = "not unique";
+            if ("email" in data["detail"]) errors.email = "not unique";
+            setErrors({ ...errors });
+          }
+        }
       }
     }
     if (fetchRegister.isSuccess) {
@@ -68,132 +101,71 @@ function RegisterForm() {
       setEmail("");
       setPassword("");
       setConfirmPassword("");
-      setError({});
+      setErrors({});
     }
   }, [fetchRegister.status]);
 
   return (
     <CenterCard heading="Registration">
-      <TextField.Root
+      <InputField
         placeholder="Username"
-        size="3"
-        onChange={(e) => setUsername(e.target.value)}
+        onChange={setUsername}
         value={username || ""}
-      >
-        <TextField.Slot>
-          <PersonIcon />
-        </TextField.Slot>
-      </TextField.Root>
+        icon={<PersonIcon />}
+        callout={"username" in errors}
+        calloutMsg={
+          errors.username === "required"
+            ? "Please, set a username."
+            : errors.username === "not unique"
+            ? "Username is already taken."
+            : errors.username === "rules"
+            ? "Username must be atleast 3 digits long."
+            : ""
+        }
+      />
 
-      {error && "username" in error && (
-        <Callout.Root color="red" variant="surface" size="1" className="mb-2">
-          <Callout.Icon>
-            <InfoCircledIcon />
-          </Callout.Icon>
-          <Callout.Text>
-            {error.username === "required"
-              ? "Please, set a username."
-              : error.username === "not unique"
-              ? "Username is already taken."
-              : error.username === "rules" &&
-                "Username must be atleast 2 digits long."}
-          </Callout.Text>
-        </Callout.Root>
-      )}
-
-      <TextField.Root
-        size="3"
+      <InputField
         placeholder="Email address"
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={setEmail}
         value={email || ""}
-      >
-        <TextField.Slot>
-          <EnvelopeClosedIcon />
-        </TextField.Slot>
-      </TextField.Root>
+        icon={<EnvelopeClosedIcon />}
+        callout={"email" in errors}
+        calloutMsg={
+          errors.email === "required"
+            ? "Please, set an email."
+            : errors.email === "not unique"
+            ? "This email adress is already registered."
+            : errors.email === "rules"
+            ? "Be sure to provide a valid email address."
+            : ""
+        }
+      />
 
-      {error && "email" in error && (
-        <Callout.Root color="red" variant="surface" size="1" className="mb-2">
-          <Callout.Icon>
-            <InfoCircledIcon />
-          </Callout.Icon>
-          <Callout.Text>
-            {error.email === "required"
-              ? "Please, set an email."
-              : error.email === "not unique"
-              ? "This email adress is already registered."
-              : error.email === "rules" &&
-                "Be sure to provide a valid email address."}
-          </Callout.Text>
-        </Callout.Root>
-      )}
-
-      <TextField.Root
+      <InputField
         placeholder="Password"
-        size="3"
-        onChange={(e) => setPassword(e.target.value)}
-        type={passwordVisible ? undefined : "password"}
+        onChange={setPassword}
         value={password || ""}
-      >
-        <TextField.Slot>
-          <LockClosedIcon />
-        </TextField.Slot>
-        <TextField.Slot>
-          <IconButton
-            variant="ghost"
-            color="gray"
-            className="hover:cursor-pointer"
-            onClick={togglePasswordVisibility}
-          >
-            {passwordVisible ? <EyeOpenIcon /> : <EyeNoneIcon />}
-          </IconButton>
-        </TextField.Slot>
-      </TextField.Root>
+        icon={<LockClosedIcon />}
+        callout={"password" in errors}
+        type={"password"}
+        calloutMsg={
+          errors.password === "required"
+            ? "Please, set a password."
+            : errors.password === "rules"
+            ? "Password should be atleast 8 digits long"
+            : ""
+        }
+      />
 
-      {error && "password" in error && (
-        <Callout.Root color="red" variant="surface" size="1" className="mb-2">
-          <Callout.Icon>
-            <InfoCircledIcon />
-          </Callout.Icon>
-          <Callout.Text>
-            {error.password === "required"
-              ? "Please, set a password."
-              : error.password === "rules" &&
-                "Requirements: length > 8, numbers and uppercase/lowercase letters"}
-          </Callout.Text>
-        </Callout.Root>
-      )}
-
-      <TextField.Root
+      <InputField
         placeholder="Confirm password"
-        size="3"
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        type={confirmPasswordVisible ? undefined : "password"}
+        onChange={setConfirmPassword}
         value={confirmPassword || ""}
-      >
-        <TextField.Slot>
-          <LockOpen1Icon />
-        </TextField.Slot>
-        <TextField.Slot>
-          <IconButton
-            variant="ghost"
-            color="gray"
-            className="hover:cursor-pointer"
-            onClick={toggleConfirmPasswordVisibility}
-          >
-            {confirmPasswordVisible ? <EyeOpenIcon /> : <EyeNoneIcon />}
-          </IconButton>
-        </TextField.Slot>
-      </TextField.Root>
-
-      {error && "confirmPassword" in error && (
-        <Callout.Root color="red" variant="surface" size="1" className="mb-2">
-          <Callout.Icon>
-            <InfoCircledIcon />
-          </Callout.Icon>
-          <Callout.Text>Password do not match</Callout.Text>
-        </Callout.Root>
-      )}
+        icon={<LockOpen1Icon />}
+        type={"password"}
+        callout={"confirmPassword" in errors}
+        calloutMsg="Passwords do not match"
+      />
 
       {fetchRegister.isSuccess && (
         <Callout.Root color="green" variant="surface" size="1" className="mb-2">

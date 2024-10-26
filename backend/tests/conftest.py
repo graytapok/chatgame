@@ -1,14 +1,15 @@
+from flask import Flask
 from flask_mongoengine import MongoEngine
 
 import mongoengine
 import pytest
 
 from chatgame import create_app
-from chatgame.database.models import User
+from chatgame.db.models import User
 
 @pytest.fixture
 def app():
-    app = create_app(test=True)
+    app = create_app(mode="test")
 
     with app.app_context():
         yield app
@@ -37,7 +38,7 @@ def db(app):
         admin=True,
         email_confirmed=True
     )
-    user.set_password("test", test=True)
+    user.set_password("test")
     user.save()
 
     yield test_db
@@ -45,14 +46,13 @@ def db(app):
     test_db.connection["default"].drop_database(db_name)
 
 @pytest.fixture
-def user(db):
-    user = User.objects(username="Test").first()
-    yield user
+def user(db: MongoEngine) -> User:
+    return User.objects(username="Test").first()
 
 @pytest.fixture
-def client(app, db):
-    return app.test_client(user=None)
+def client(app: Flask):
+    return app.test_client()
 
 @pytest.fixture
-def auth_client(app, user, db):
+def auth_client(app: Flask, user: User):
     return app.test_client(user=user)

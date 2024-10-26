@@ -1,16 +1,8 @@
 import { useContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AxiosError, AxiosResponse } from "axios";
+import { Blockquote, Callout, Text } from "@radix-ui/themes";
 import {
-  Blockquote,
-  Callout,
-  IconButton,
-  TextField,
-  Text,
-} from "@radix-ui/themes";
-import {
-  EyeNoneIcon,
-  EyeOpenIcon,
   InfoCircledIcon,
   LockClosedIcon,
   LockOpen1Icon,
@@ -20,15 +12,10 @@ import Button from "src/components/ui/Button";
 import { useChangePassword } from "src/api/auth";
 import CenterCard from "src/components/ui/CenterCard";
 import { ForgotPasswordContext } from "src/pages/_auth/ForgotPassword";
-
-interface ErrorResponse {
-  message: string;
-  errors: Error;
-}
+import InputField from "src/components/InputField";
+import { ApiValidationError } from "src/types/api";
 
 interface Error {
-  userId?: string;
-  token?: string;
   password?: string;
   confirmPassword?: string;
 }
@@ -37,26 +24,42 @@ function ForgotPasswordConfirm() {
   const fetchConfirm = useChangePassword();
   const setRender = useContext(ForgotPasswordContext);
 
-  const [error, setError] = useState<Error>({});
-  const [errorMessage, setErrorMessage] = useState("");
+  const [status, setStatus] = useState<number>();
+  const [errors, setErrors] = useState<Error>({});
 
-  const [newPassword, setNewPassword] = useState("");
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  const [newPasswordVisible, setNewPasswordVisibility] = useState(false);
-  const [confirmPasswordVisible, setConfirmPasswordVisibility] =
-    useState(false);
 
   const [args, setArgs] = useSearchParams();
   const userHash = args.get("u") || "";
   const token = args.get("t") || "";
 
-  const togglePasswordVisibility = () => {
-    setNewPasswordVisibility(!newPasswordVisible);
-  };
+  const handleSubmit = () => {
+    if (!password) {
+      errors.password = "required";
+    } else {
+      delete errors.password;
+    }
 
-  const toggleConfirmPasswordVisibility = () => {
-    setConfirmPasswordVisibility(!confirmPasswordVisible);
+    if (!confirmPassword) {
+      errors.confirmPassword = "required";
+    } else {
+      delete errors.confirmPassword;
+    }
+
+    if (password != confirmPassword) {
+      setErrors((prev) => ({ ...prev, confirmPassword: "rules" }));
+    }
+
+    setErrors({ ...errors });
+
+    if (Object.keys(errors).length === 0) {
+      fetchConfirm.mutate({
+        password,
+        userHash,
+        token,
+      });
+    }
   };
 
   const redirectForm = () => {
@@ -66,97 +69,64 @@ function ForgotPasswordConfirm() {
 
   useEffect(() => {
     if (fetchConfirm.isError) {
-      const res = fetchConfirm.error as AxiosError;
-      if (res.response !== undefined) {
-        const apiError = res.response as AxiosResponse;
-        const data = apiError.data as ErrorResponse;
-        setError(data.errors);
-        setErrorMessage(data.message);
+      const error = fetchConfirm.error as AxiosError;
+      const res = error.response as AxiosResponse;
+      const data = res.data;
+      setStatus(res.status);
+
+      if (res.status === 400) {
+        if ("validation_error" in data) {
+          const list: ApiValidationError[] =
+            data["validation_error"]["body_params"];
+
+          list.forEach((e) => {
+            if (e.loc.includes("password")) errors.password = "rules";
+          });
+
+          setErrors({ ...errors });
+        }
       }
     }
-    if (fetchConfirm.isSuccess) {
-      setNewPassword("");
+
+    if (fetchConfirm.isSuccess && setRender) {
+      setStatus(undefined);
+      setPassword("");
       setConfirmPassword("");
-      setError({});
-      setArgs("");
-      if (setRender) {
-        setRender("success");
-      }
+      setRender("success");
     }
-  }, [fetchConfirm, error]);
+  }, [fetchConfirm]);
 
   return (
     <CenterCard heading="Forgot Password - Change">
       <Blockquote size="5">Enter a new password!</Blockquote>
 
-      <TextField.Root
-        type={newPasswordVisible ? undefined : "password"}
-        value={newPassword || ""}
-        onChange={(e) => setNewPassword(e.target.value)}
+      <InputField
         placeholder="New password"
-        size="3"
-      >
-        <TextField.Slot>
-          <LockClosedIcon />
-        </TextField.Slot>
-        <TextField.Slot>
-          <IconButton
-            variant="ghost"
-            color="gray"
-            className="hover:cursor-pointer"
-            onClick={togglePasswordVisibility}
-          >
-            {newPasswordVisible ? <EyeOpenIcon /> : <EyeNoneIcon />}
-          </IconButton>
-        </TextField.Slot>
-      </TextField.Root>
+        onChange={setPassword}
+        type={"password"}
+        value={password || ""}
+        icon={<LockClosedIcon />}
+        callout={"password" in errors}
+        calloutMsg={
+          errors.password === "required"
+            ? "Please, set a password."
+            : errors.password === "rules"
+            ? "Password should be atleast 8 digits long"
+            : ""
+        }
+      />
 
-      {error && "password" in error && (
-        <Callout.Root color="red" variant="surface" size="1" className="mb-2">
-          <Callout.Icon>
-            <InfoCircledIcon />
-          </Callout.Icon>
-          <Callout.Text>
-            {error.password === "required"
-              ? "Please, set a password."
-              : error.password === "rules" &&
-                "Requirements: length > 8, numbers and uppercase/lowercase letters"}
-          </Callout.Text>
-        </Callout.Root>
-      )}
-
-      <TextField.Root
-        type={confirmPasswordVisible ? undefined : "password"}
-        value={confirmPassword || ""}
-        size="3"
-        onChange={(e) => setConfirmPassword(e.target.value)}
+      <InputField
         placeholder="Confirm password"
-      >
-        <TextField.Slot>
-          <LockOpen1Icon />
-        </TextField.Slot>
-        <TextField.Slot>
-          <IconButton
-            variant="ghost"
-            color="gray"
-            className="hover:cursor-pointer"
-            onClick={toggleConfirmPasswordVisibility}
-          >
-            {confirmPasswordVisible ? <EyeOpenIcon /> : <EyeNoneIcon />}
-          </IconButton>
-        </TextField.Slot>
-      </TextField.Root>
+        onChange={setConfirmPassword}
+        type={"password"}
+        value={confirmPassword || ""}
+        icon={<LockOpen1Icon />}
+        callout={"confirmPassword" in errors}
+        calloutMsg={"Passwords do not match"}
+      />
 
-      {error && "confirmPassword" in error && (
-        <Callout.Root color="red" variant="surface" size="1" className="mb-2">
-          <Callout.Icon>
-            <InfoCircledIcon />
-          </Callout.Icon>
-          <Callout.Text>Password do not match</Callout.Text>
-        </Callout.Root>
-      )}
-
-      {errorMessage === "token expired" && (
+      {status && (
         <Callout.Root
           color="red"
           variant="surface"
@@ -167,7 +137,7 @@ function ForgotPasswordConfirm() {
             <InfoCircledIcon />
           </Callout.Icon>
           <Callout.Text>
-            Your token expired!{" "}
+            Your token is expired or invalid!{" "}
             <Text
               onClick={redirectForm}
               color="blue"
@@ -179,17 +149,7 @@ function ForgotPasswordConfirm() {
         </Callout.Root>
       )}
 
-      <Button
-        onClick={() =>
-          fetchConfirm.mutate({
-            newPassword,
-            confirmPassword,
-            userHash,
-            token,
-          })
-        }
-        loading={fetchConfirm.isPending}
-      >
+      <Button onClick={handleSubmit} loading={fetchConfirm.isPending}>
         Submit
       </Button>
     </CenterCard>
