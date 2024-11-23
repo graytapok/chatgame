@@ -31,7 +31,6 @@ function ForgotPasswordConfirm() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [args, setArgs] = useSearchParams();
-  const userHash = args.get("u") || "";
   const token = args.get("t") || "";
 
   const handleSubmit = () => {
@@ -48,7 +47,9 @@ function ForgotPasswordConfirm() {
     }
 
     if (password != confirmPassword) {
-      setErrors((prev) => ({ ...prev, confirmPassword: "rules" }));
+      errors.confirmPassword = "rules";
+    } else {
+      delete errors.confirmPassword;
     }
 
     setErrors({ ...errors });
@@ -56,7 +57,6 @@ function ForgotPasswordConfirm() {
     if (Object.keys(errors).length === 0) {
       fetchConfirm.mutate({
         password,
-        userHash,
         token,
       });
     }
@@ -126,7 +126,7 @@ function ForgotPasswordConfirm() {
         calloutMsg={"Passwords do not match"}
       />
 
-      {status && (
+      {status == 410 && (
         <Callout.Root
           color="red"
           variant="surface"

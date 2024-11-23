@@ -1,18 +1,18 @@
-import { useMutation } from '@tanstack/react-query';
-import { apiClient } from 'src/api';
+import { useMutation } from "@tanstack/react-query";
+import { apiClient } from "src/api";
 
 interface postResendProps {
-    login: string
+  login: string;
 }
 
 const postResend = async (props: postResendProps) => {
-    const response = await apiClient.post("/auth/resend_email", props);
-    return response.data
-}
+  const response = await apiClient.post("/auth/register/resend", props);
+  return response.data;
+};
 
 export const useResend = () => {
-    return useMutation({
-        mutationFn: postResend,
-        mutationKey: ["auth", "resend"],
-    })
-}
+  return useMutation({
+    mutationFn: postResend,
+    mutationKey: ["auth", "resend"],
+  });
+};

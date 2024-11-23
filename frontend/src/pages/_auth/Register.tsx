@@ -16,12 +16,11 @@ function Register() {
 
   const [render, setRender] = useState("form");
   const [args] = useSearchParams();
-  const userHash = args.get("u");
   const token = args.get("t");
 
   useEffect(() => {
-    if (userHash && token && fetchConfirm.isIdle) {
-      fetchConfirm.mutate({ userHash, token });
+    if (token && fetchConfirm.isIdle) {
+      fetchConfirm.mutate({ token });
       setRender("confirm");
     }
   }, [fetchConfirm]);

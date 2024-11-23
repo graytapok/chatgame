@@ -88,9 +88,9 @@ function RegisterForm() {
 
             setErrors({ ...errors });
           }
-          if ("detail" in data) {
-            if ("username" in data["detail"]) errors.username = "not unique";
-            if ("email" in data["detail"]) errors.email = "not unique";
+          if ("details" in data) {
+            if ("username" in data["details"]) errors.username = "not unique";
+            if ("email" in data["details"]) errors.email = "not unique";
             setErrors({ ...errors });
           }
         }

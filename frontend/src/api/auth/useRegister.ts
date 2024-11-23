@@ -8,23 +8,13 @@ interface useRegisterProps {
   password: string;
 }
 
-interface useConfirmRegisterProps {
-  userHash: string;
-  token: string;
-}
-
 const postRegister = async (registerData: useRegisterProps) => {
   const response = await apiClient.post("/auth/register", registerData);
   return response.data;
 };
 
-const getConfirmRegister = async ({
-  userHash,
-  token,
-}: useConfirmRegisterProps) => {
-  const response = await apiClient.post(
-    `/auth/confirm_email?u=${userHash}&t=${token}`
-  );
+const getConfirmRegister = async ({ token }: { token: string }) => {
+  const response = await apiClient.post(`/auth/register/confirm?t=${token}`);
   return response.data;
 };
 

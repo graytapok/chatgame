@@ -3,14 +3,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface ChangePasswordProps {
   password: string;
-  userHash?: string;
   token?: string;
 }
 
 const postForgotPasswordChange = async (params: ChangePasswordProps) => {
-  if (params.userHash && params.token) {
+  if (params.token) {
     const res = await apiClient.post(
-      `/auth/change_password?u=${params.userHash}&t=${params.token}`,
+      `/auth/change_password?t=${params.token}`,
       {
         password: params.password,
       }
@@ -29,8 +28,8 @@ export const useChangePassword = () => {
   return useMutation({
     mutationFn: postForgotPasswordChange,
     mutationKey: ["auth", "passwordChange"],
-    onSuccess: (_data, { userHash, token }) => {
-      if (userHash && token) {
+    onSuccess: (_data, { token }) => {
+      if (token) {
         queryClient.invalidateQueries({ queryKey: ["auth"], exact: true });
       }
     },

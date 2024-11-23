@@ -12,7 +12,6 @@ Flask-Cors==4.0.0
 Flask-Login==0.6.3
 Flask-Mail==0.9.1
 flask-marshmallow==1.2.1
-flask-mongoengine-3==1.0.9
 flask-restx==1.3.0
 Flask-Session==0.8.0
 h11==0.14.0
@@ -28,10 +27,8 @@ markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 marshmallow==3.21.1
 mdurl==0.1.2
-mongoengine==0.28.2
 packaging==24.0
 Pygments==2.17.2
-pymongo==4.6.3
 python-dotenv==1.0.1
 pytz==2024.1
 referencing==0.35.0
@@ -45,3 +42,8 @@ typing_extensions==4.11.0
 Werkzeug==3.0.2
 
 icecream~=2.1.3
+pytest~=8.2.0
+pydantic~=2.9.0
+Flask-SocketIO~=5.3.6
+SQLAlchemy~=2.0.36
+Flask-Migrate~=4.0.7

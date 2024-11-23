@@ -13,11 +13,10 @@ export const ForgotPasswordContext = createContext<Dispatch<
 function ForgotPassword() {
   const [args] = useSearchParams();
   const [render, setRender] = useState("form");
-  const userHash = args.get("u");
   const token = args.get("t");
 
   useEffect(() => {
-    if (userHash && token) {
+    if (token) {
       setRender("change");
     }
   }, []);

@@ -1,0 +1,158 @@
+from random import randint
+
+from pydantic import BaseModel
+
+from chatgame.sockets.tictactoe.TictactoeGame import TictactoeGame
+from chatgame.sockets.tictactoe.Player import Player
+
+
+class TictactoeManager(BaseModel):
+    unmatched_player_id: str | None = None
+    players: dict[str, Player] = {}
+    games: dict[str, TictactoeGame] = {}
+
+    def add_player(self, sid: str, username: str):
+        if not username:
+            username = f"Guest{randint(1000, 9999)}"
+
+        self.players.update({
+            sid: Player(sid=sid, username=username, opponent_id=self.unmatched_player_id)
+        })
+
+        if self.unmatched_player_id is None:
+            self.unmatched_player_id = sid
+
+    def setup_game(self, sid: str):
+        if sid not in self.players:
+            return
+
+        self.players[sid].symbol = "O"
+
+        self.players[self.unmatched_player_id].opponent_id = sid
+
+        self.unmatched_player_id = None
+
+        opponent = self.get_opponent(sid)
+        player = self.get_player(sid)
+
+        room = player.sid + opponent.sid
+
+        self.players[sid].room = room
+        self.players[opponent.sid].room = room
+
+        self.games.update({
+            room: TictactoeGame(room=room)
+        })
+
+    def make_move(self, sid: str, move: int):
+        player = self.get_player(sid)
+        opponent = self.get_opponent(sid)
+        game = self.get_game(sid)
+
+        if not opponent:
+            return
+
+        if move < 0 or move > 8:
+            return
+
+        if game.check_winner():
+            return
+
+        if game.turn != player.symbol:
+            return
+
+        game.turn = "X" if player.symbol == "O" else "O"
+
+        game.fields[move] = player.symbol
+
+        if winner := game.check_winner():
+            game.status = "finished"
+            return {"winner": winner}
+
+        return {"success": True}
+
+    def rematch(self, sid: str, decision: bool):
+        player = self.get_player(sid)
+        opponent = self.get_opponent(sid)
+        game = self.get_game(sid)
+
+        if not player or not game:
+            return
+
+        if not game.rematch:
+            game.decide_rematch(sid, decision)
+
+            return "send request"
+
+        if player.sid not in game.rematch and opponent.sid in game.rematch:
+            game.decide_rematch(sid, decision)
+
+            if game.rematch[player.sid] and game.rematch[opponent.sid]:
+                ps = player.symbol
+                os = opponent.symbol
+
+                player.symbol = os
+                opponent.symbol = ps
+
+                game.setup_rematch()
+
+                return "accepted"
+
+            return "rejected"
+
+        return
+
+    def disconnect(self, sid: str):
+        opponent = self.get_opponent(sid)
+        game = self.get_game(sid)
+
+        res = []
+
+        if opponent:
+            res.append("emit")
+
+        if sid in self.players:
+            room = self.get_room(sid)
+
+            if room in self.games:
+                del self.games[room]
+
+            del self.players[sid]
+            res.append("close")
+
+        if self.unmatched_player_id == sid:
+            self.unmatched_player_id = None
+
+        return res
+
+    def get_opponent(self, sid: str):
+        if sid not in self.players:
+            return
+
+        osid = self.players[sid].opponent_id
+
+        if osid in self.players:
+            return self.players[osid]
+
+        return None
+
+    def get_player(self, sid: str):
+        if sid not in self.players:
+            return
+        return self.players[sid]
+
+    def get_room(self, sid: str):
+        if sid not in self.players:
+            return
+        return self.players[sid].room
+
+    def get_game(self, sid: str):
+        if sid not in self.players:
+            return
+
+        room = self.get_room(sid)
+
+        if room in self.games:
+            return self.games[room]
+
+        return None

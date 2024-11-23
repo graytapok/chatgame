@@ -37,7 +37,7 @@ function Login() {
 
       if (res.response) {
         const apiError = res.response as AxiosResponse;
-        const apiData = apiError.data.detail;
+        const apiData = apiError.data.details;
         if (apiData === "Email is not confirmed") {
           navigate("/resend?m=email");
         }
