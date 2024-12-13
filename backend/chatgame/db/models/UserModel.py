@@ -1,4 +1,5 @@
 from flask_login import UserMixin
+from sqlalchemy import Table, Column, ForeignKey
 from sqlalchemy.exc import DataError
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -6,17 +7,25 @@ import uuid
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from chatgame.db import Base
 from chatgame.extensions import db, login
-from chatgame.models import TotalStatisticsModel
+from chatgame.db.models import TotalStatisticsModel
 
+friends_table = Table(
+    "friends",
+    Base.metadata,
+    Column("user_id", ForeignKey("user.id"), primary_key=True),
+    Column("friend_id", ForeignKey("user.id"), primary_key=True)
+)
 
 class UserModel(UserMixin, db.Model):
-    __tablename__ = "users"
+    __tablename__ = "user"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4())
     username: Mapped[str] = mapped_column(unique=True, nullable=False)
     email: Mapped[str] = mapped_column(nullable=False, unique=True)
     password_hash: Mapped[str]
+
     admin: Mapped[bool] = mapped_column(default=False)
     email_confirmed: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(default=datetime.now())
@@ -25,6 +34,13 @@ class UserModel(UserMixin, db.Model):
     password_token: Mapped[str] = mapped_column(nullable=True)
 
     statistics: Mapped["TotalStatisticsModel"] = relationship(back_populates="user", cascade="all, delete")
+    friends: Mapped[list["UserModel"]] = relationship(
+        back_populates="friends",
+        secondary=friends_table,
+        primaryjoin=id == friends_table.c.user_id,
+        secondaryjoin=id == friends_table.c.friend_id,
+        cascade="all, delete"
+    )
 
     def __init__(
             self,

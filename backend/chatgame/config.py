@@ -1,7 +1,11 @@
 import os
+from typing import Literal
+
 from dotenv import load_dotenv
 
 load_dotenv(".env")
+
+ConfigClasses = Literal["DevelopmentConfig", "ProductionConfig", "TestConfig"]
 
 class Config(object):
     # Flask
@@ -14,8 +18,15 @@ class Config(object):
     # ItsDangerous
     ITSDANGEROUS_SECRET_KEY = os.getenv('ITSDANGEROUS_SECRET_KEY')
 
-    # Flask Mongoengine
-    SQLALCHEMY_DATABASE_URI = os.getenv("DB_URL")
+    # Flask Sqlalchemy
+    DB_USER = os.getenv("DB_USER")
+    DB_PASSWORD = os.getenv("DB_PASSWORD")
+    DB_HOST = os.getenv("DB_HOST")
+    DB_PORT = os.getenv("DB_PORT")
+    DB_NAME = os.getenv("DB_NAME")
+
+    SQLALCHEMY_DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    SQLALCHEMY_ECHO = False
 
     # Flask Mail
     MAIL_DEBUG = False
@@ -37,7 +48,7 @@ class TestConfig(Config):
     DEBUG = True
     TESTING = True
 
-    SQLALCHEMY_DATABASE_URI = os.getenv("TEST_DB_URL")
+    SQLALCHEMY_DATABASE_URI = f"{Config.SQLALCHEMY_DATABASE_URI}_test"
 
 
 class ProductionConfig(Config):

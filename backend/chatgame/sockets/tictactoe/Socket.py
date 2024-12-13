@@ -4,32 +4,27 @@ from flask_socketio import join_room, emit, close_room, Namespace
 
 from .TictactoeManager import TictactoeManager
 
-manager = TictactoeManager()
-
 class Socket(Namespace):
+    def __init__(self, namespace: str | None = None):
+        self.manager = TictactoeManager()
+        super().__init__(namespace)
+    
     def on_connect(self):
         sid = request.sid
 
-        username = None
+        unmatched_before = self.manager.unmatched_player_id
 
-        if current_user.is_authenticated:
-            username = current_user.username
-
-        unmatched_before = manager.unmatched_player_id
-
-        manager.add_player(sid, username=username)
+        self.manager.add_player(sid, username=current_user.username if current_user.is_authenticated else None)
 
         if unmatched_before is not None:
-            manager.setup_game(sid)
+            self.manager.setup_game(sid)
 
-            room = manager.get_room(sid)
-            player = manager.get_player(sid)
-            opponent = manager.get_opponent(sid)
+            room = self.manager.get_room(sid)
+            player = self.manager.get_player(sid)
+            opponent = self.manager.get_opponent(sid)
 
             join_room(room)
             join_room(room, sid=opponent.sid)
-
-            game = manager.get_game(sid)
 
             emit(
                 "game_begin",
@@ -62,8 +57,8 @@ class Socket(Namespace):
     def on_message(self, message: str):
         sid = request.sid
 
-        player = manager.get_player(sid)
-        opponent = manager.get_opponent(sid)
+        player = self.manager.get_player(sid)
+        opponent = self.manager.get_opponent(sid)
 
         if not player or not opponent: return
 
@@ -93,11 +88,11 @@ class Socket(Namespace):
     def on_make_move(self, move: int):
         sid = request.sid
 
-        player = manager.get_player(sid)
-        room = manager.get_room(sid)
-        game = manager.get_game(sid)
+        player = self.manager.get_player(sid)
+        room = self.manager.get_room(sid)
+        game = self.manager.get_game(sid)
 
-        res = manager.make_move(sid, move)
+        res = self.manager.make_move(sid, move)
 
         if res:
             emit(
@@ -117,10 +112,10 @@ class Socket(Namespace):
     def on_rematch(self, decision: bool = True):
         sid = request.sid
 
-        opponent = manager.get_opponent(sid)
-        room = manager.get_room(sid)
+        opponent = self.manager.get_opponent(sid)
+        room = self.manager.get_room(sid)
 
-        res = manager.rematch(sid, decision)
+        res = self.manager.rematch(sid, decision)
 
         if res == "send request":
             emit(
@@ -143,10 +138,10 @@ class Socket(Namespace):
     def on_disconnect(self):
         sid = request.sid
 
-        opponent = manager.get_opponent(sid)
-        room = manager.get_room(sid)
+        opponent = self.manager.get_opponent(sid)
+        room = self.manager.get_room(sid)
 
-        res = manager.disconnect(sid)
+        res = self.manager.disconnect(sid)
 
         if "emit" in res:
             emit("opponent_left", to=opponent.sid)

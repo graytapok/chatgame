@@ -7,7 +7,7 @@ from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 
 from chatgame.config import Config
-from chatgame.models import Base
+from chatgame.db import Base
 
 socketio = SocketIO(cors_allowed_origins="*", manage_session=False, logger=False)
 safe = URLSafeTimedSerializer(Config.ITSDANGEROUS_SECRET_KEY)

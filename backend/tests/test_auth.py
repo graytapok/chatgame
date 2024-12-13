@@ -1,4 +1,4 @@
-from chatgame.models import UserModel
+from chatgame.db.models import UserModel
 from chatgame.extensions import db
 
 

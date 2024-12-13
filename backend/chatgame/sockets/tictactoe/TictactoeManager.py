@@ -11,7 +11,7 @@ class TictactoeManager(BaseModel):
     players: dict[str, Player] = {}
     games: dict[str, TictactoeGame] = {}
 
-    def add_player(self, sid: str, username: str):
+    def add_player(self, sid: str, username: str | None):
         if not username:
             username = f"Guest{randint(1000, 9999)}"
 
@@ -67,6 +67,7 @@ class TictactoeManager(BaseModel):
 
         if winner := game.check_winner():
             game.status = "finished"
+
             return {"winner": winner}
 
         return {"success": True}

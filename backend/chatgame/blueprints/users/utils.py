@@ -6,7 +6,7 @@ from itsdangerous import SignatureExpired, BadSignature
 from chatgame.blueprints.users.dto import UserValidationErrorDetails
 from chatgame.extensions import safe, db
 from chatgame.exceptions import *
-from chatgame.models import UserModel
+from chatgame.db.models import UserModel
 
 def validate_user(username: Optional[str] = None, email: Optional[str] = None) -> None:
     details = UserValidationErrorDetails()
@@ -64,7 +64,7 @@ def check_token(token: str, token_type: Literal["verification", "password"]) -> 
     except BadSignature:
         raise InvalidTokenException(token_label)
 
-    user: UserModel = db.session.query(UserModel).filter_by(email=email)
+    user: UserModel = db.session.query(UserModel).filter_by(email=email).first()
 
     if user is None:
         raise NotFoundException("User", email)
@@ -95,6 +95,14 @@ def get_user_or_throw(user_id: str) -> UserModel:
 
     return user
 
+def get_user_by_username_or_throw(username: str) -> UserModel:
+    user = db.session.query(UserModel).where(UserModel.username == username).first()
+
+    if user is None:
+        raise NotFoundException("User", username)
+
+    return user
+
 def get_user_by_login(login: str) -> Optional[UserModel]:
     try:
         validate_email(login)
@@ -102,3 +110,13 @@ def get_user_by_login(login: str) -> Optional[UserModel]:
     except EmailNotValidError:
         user = db.session.query(UserModel).filter_by(username=login).first()
     return user
+
+def add_fiend(user: UserModel, username: str):
+    if username == user.username:
+        raise BadRequestException("The friend must be some else, not you.")
+
+    new_friend = get_user_by_username_or_throw(username)
+
+    user.friends.append(new_friend)
+    new_friend.friends.append(user)
+    db.session.commit()

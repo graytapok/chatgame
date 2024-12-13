@@ -1,8 +1,8 @@
-from typing import Optional, List
+from typing import List
 from uuid import UUID
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field
 
-from chatgame.dto import SubStatisticsDto
+from chatgame.db.dto import SubStatisticsDto
 
 
 class TotalStatisticsDto(BaseModel):
@@ -13,6 +13,8 @@ class TotalStatisticsDto(BaseModel):
     total_wins: int
     total_draws: int
     total_losses: int
+
+    win_percentage: float
 
     sub_statistics: List[SubStatisticsDto] = Field(default_factory=list)
 

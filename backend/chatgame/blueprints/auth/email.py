@@ -5,7 +5,7 @@ from threading import Thread
 
 from chatgame.extensions import mail
 from chatgame.blueprints.users.utils import create_token
-from chatgame.models import UserModel
+from chatgame.db.models import UserModel
 
 
 def send_email(app, msg):

@@ -50,7 +50,7 @@ def page_not_found(e):
 @bp.app_errorhandler(405)
 def method_not_allowed(e):
     exception = ApiExceptionDto(
-        status=404,
+        status=405,
         message="Method not allowed",
         path=request.path
     )

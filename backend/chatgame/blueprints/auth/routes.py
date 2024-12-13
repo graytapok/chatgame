@@ -6,6 +6,7 @@ from .email import send_registration_email, send_change_password_email
 from .exceptions import *
 from .deps import no_login_required
 from ..auth import bp
+
 from chatgame.blueprints.users import utils
 from chatgame.exceptions import NotFoundException
 
