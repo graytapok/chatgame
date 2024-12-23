@@ -2,12 +2,12 @@ import pytest
 
 from chatgame import create_app
 from chatgame.extensions import db
-from chatgame.blueprints.users.utils import create_user
+from chatgame.blueprints.users import UsersService
 
 
 @pytest.fixture
 def app():
-    app = create_app("TestConfig")
+    app = create_app("test")
 
     with app.app_context():
         db.create_all()
@@ -31,8 +31,8 @@ def admin_client(app, admin):
 
 @pytest.fixture
 def user(app):
-    return create_user("User", "user@gmail.com", "password", email_confirmed=True)
+    return UsersService.create_user("User", "user@gmail.com", "password", email_confirmed=True)
 
 @pytest.fixture
 def admin(app):
-    return create_user("Admin", "admin@gmail.com", "password", admin=True, email_confirmed=True)
+    return UsersService.create_user("Admin", "admin@gmail.com", "password", admin=True, email_confirmed=True)

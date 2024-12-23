@@ -47,3 +47,6 @@ pydantic~=2.9.0
 Flask-SocketIO~=5.3.6
 SQLAlchemy~=2.0.36
 Flask-Migrate~=4.0.7
+pydantic-settings~=2.5.2
+alembic~=1.14.0
+Flask-APScheduler~=1.13.1

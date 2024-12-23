@@ -1,6 +1,6 @@
 import click
 
-from ..users import bp, utils
+from ..users import bp, UsersService
 
 
 @bp.cli.command("create-admin")
@@ -8,7 +8,7 @@ from ..users import bp, utils
 @click.argument("email")
 @click.argument("password")
 def create_admin(name, email, password):
-    utils.create_user(name, email, password, admin=True, email_confirmed=True)
+    UsersService.create_user(name, email, password, admin=True, email_confirmed=True)
 
     print(f"Admin '{name}' created.")
 
@@ -18,6 +18,6 @@ def create_admin(name, email, password):
 @click.argument("email")
 @click.argument("password")
 def create_user(name, email, password):
-    utils.create_user(name, email, password, email_confirmed=True)
+    UsersService.create_user(name, email, password, email_confirmed=True)
 
     print(f"User '{name}' created.")

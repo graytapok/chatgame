@@ -5,6 +5,11 @@ class Game(Enum):
     TICTACTOE = "tictactoe"
     TICTACTOE_PLUS = "tictactoe_plus"
 
+class FriendRequestStatus(Enum):
+    IDLE = "idle"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+
 tictactoe_possible_wins = (
     [0, 1, 2],
     [3, 4, 5],

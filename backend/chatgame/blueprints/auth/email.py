@@ -3,8 +3,9 @@ from flask_mail import Message
 
 from threading import Thread
 
+from chatgame.config import config
 from chatgame.extensions import mail
-from chatgame.blueprints.users.utils import create_token
+from chatgame.blueprints.users import UsersService
 from chatgame.db.models import UserModel
 
 
@@ -13,17 +14,17 @@ def send_email(app, msg):
         mail.send(msg)
 
 def send_registration_email(user: UserModel):
-    token = create_token(user, "verification")
+    token = UsersService.create_token(user, "verification")
 
     msg = Message(
         subject="Registration - Chatgame",
-        sender=current_app.config["MAIL_USERNAME"],
+        sender=config.MAIL_USERNAME,
         recipients=[user.email]
     )
 
     msg.html = render_template(
         "auth/register_email.html",
-        link=f"{current_app.config['DOMAIN']}/register?t={token}"
+        link=f"{config.DOMAIN}/register?t={token}"
     )
 
     Thread(
@@ -32,16 +33,16 @@ def send_registration_email(user: UserModel):
     ).start()
 
 def send_change_password_email(user: UserModel):
-    token = create_token(user, "password")
+    token = UsersService.create_token(user, "password")
 
     msg = Message(
         subject="Password Change - Chatgame",
-        sender=current_app.config["MAIL_USERNAME"],
+        sender=config.MAIL_USERNAME,
         recipients=[user.email]
     )
     msg.html = render_template(
         "auth/password_email.html",
-        link=f"{current_app.config['DOMAIN']}/forgot_password?t={token}"
+        link=f"{config.DOMAIN}/forgot_password?t={token}"
     )
 
     Thread(

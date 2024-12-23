@@ -9,10 +9,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from chatgame.db import Base
 from chatgame.extensions import db, login
-from chatgame.db.models import TotalStatisticsModel
+from chatgame.db.models import TotalStatisticsModel, FriendRequestModel
 
-friends_table = Table(
-    "friends",
+friend_table = Table(
+    "friend",
     Base.metadata,
     Column("user_id", ForeignKey("user.id"), primary_key=True),
     Column("friend_id", ForeignKey("user.id"), primary_key=True)
@@ -34,11 +34,22 @@ class UserModel(UserMixin, db.Model):
     password_token: Mapped[str] = mapped_column(nullable=True)
 
     statistics: Mapped["TotalStatisticsModel"] = relationship(back_populates="user", cascade="all, delete")
+
+    sent_friend_requests: Mapped[list["FriendRequestModel"]] = relationship(
+        back_populates="sender",
+        foreign_keys=[FriendRequestModel.sender_id]
+    )
+
+    received_friend_requests: Mapped[list["FriendRequestModel"]] = relationship(
+        back_populates="receiver",
+        foreign_keys=[FriendRequestModel.receiver_id]
+    )
+
     friends: Mapped[list["UserModel"]] = relationship(
         back_populates="friends",
-        secondary=friends_table,
-        primaryjoin=id == friends_table.c.user_id,
-        secondaryjoin=id == friends_table.c.friend_id,
+        secondary=friend_table,
+        primaryjoin=id == friend_table.c.user_id,
+        secondaryjoin=id == friend_table.c.friend_id,
         cascade="all, delete"
     )
 

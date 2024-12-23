@@ -1,4 +1,4 @@
-"""empty message
+"""Create statistics table and trigger
 
 Revision ID: f64c4ab248ae
 Revises: eb199ebc6490

@@ -7,7 +7,7 @@ from .exceptions import *
 from .deps import no_login_required
 from ..auth import bp
 
-from chatgame.blueprints.users import utils
+from chatgame.blueprints.users import UsersService
 from chatgame.exceptions import NotFoundException
 
 
@@ -15,7 +15,7 @@ from chatgame.exceptions import NotFoundException
 @no_login_required
 @validate()
 def login(body: LoginBody):
-    user = utils.get_user_by_login(body.login)
+    user = UsersService.get_user_by_login(body.login)
 
     if user is None or not user.check_password(body.password):
         raise InvalidCredentialsException()
@@ -38,7 +38,7 @@ def logout():
 @no_login_required
 @validate()
 def register(body: RegisterBody, query: RegisterQuery):
-    user = utils.create_user(body.username, body.email, body.password)
+    user = UsersService.create_user(body.username, body.email, body.password)
 
     if query.email:
         send_registration_email(user)
@@ -49,7 +49,7 @@ def register(body: RegisterBody, query: RegisterQuery):
 @no_login_required
 @validate()
 def confirm_register(query: ConfirmEmailQuery):
-    user = utils.check_token(query.token, "verification")
+    user = UsersService.check_token(query.token, "verification")
 
     login_user(user)
 
@@ -59,7 +59,7 @@ def confirm_register(query: ConfirmEmailQuery):
 @no_login_required
 @validate()
 def resend_register(body: ResendEmailBody):
-    user = utils.get_user_by_login(body.login)
+    user = UsersService.get_user_by_login(body.login)
 
     if user is None:
         raise NotFoundException("User", body.login)
@@ -75,7 +75,7 @@ def resend_register(body: ResendEmailBody):
 @no_login_required
 @validate()
 def forgot_password(body: ResendEmailBody):
-    user = utils.get_user_by_login(body.login)
+    user = UsersService.get_user_by_login(body.login)
 
     if user is None:
         raise NotFoundException("User", body.login)
@@ -88,7 +88,7 @@ def forgot_password(body: ResendEmailBody):
 @no_login_required
 @validate()
 def change_password(body: ChangePasswordBody, query: ChangePasswordQuery):
-    user = utils.check_token(query.token, "password")
+    user = UsersService.check_token(query.token, "password")
 
     user.set_password(body.password)
 
