@@ -7,6 +7,7 @@ import About from "./About";
 import GameRoutes from "./games";
 import TestRoutes from "./test";
 import AuthRoutes from "./_auth";
+import LeaderboardRoutes from "./leaderboard";
 
 const AppRoutes = () => (
   <Routes>
@@ -16,7 +17,9 @@ const AppRoutes = () => (
 
       <Route path="/test/*" element={<TestRoutes />} />
       <Route path="/game/*" element={<GameRoutes />} />
-      <Route path="/*" element={<AuthRoutes />} />
+      <Route path="/leaderboard/*" element={<LeaderboardRoutes />} />
+
+      {AuthRoutes()}
 
       <Route path="*" element={<p>Not Found</p>} />
     </Route>

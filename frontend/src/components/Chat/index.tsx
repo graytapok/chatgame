@@ -19,15 +19,9 @@ interface Props {
   loading?: boolean;
   className?: string;
   socket?: Socket;
-  height?: string;
 }
 
-function Chat({
-  className,
-  height,
-  loading = false,
-  socket = chatSocket,
-}: Props) {
+function Chat({ className, loading = false, socket = chatSocket }: Props) {
   const chat = useAppSelector((state) => state.chat);
   const dispatch = useAppDispatch();
 
@@ -56,19 +50,15 @@ function Chat({
 
   return (
     <Flex direction="column" className={className || ""}>
-      {loading ? <Searching height={height} /> : <Messages height={height} />}
+      {loading ? <Searching /> : <Messages />}
       <InputField emitMessage={emitMessage} />
     </Flex>
   );
 }
 
-const Searching = ({ height }: { height?: string }) => {
+const Searching = () => {
   return (
-    <Flex
-      className={`${
-        height ? `h-[${height}]` : "h-96"
-      } justify-center items-center flex-col gap-4`}
-    >
+    <Flex className={`h-full justify-center items-center flex-col gap-4`}>
       <span>Searching for opponents...</span>
       <Spinner size="3" />
     </Flex>

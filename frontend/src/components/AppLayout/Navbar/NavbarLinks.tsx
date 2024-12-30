@@ -30,6 +30,9 @@ function NavbarLinks() {
         <NavbarLink location="/game" text="Game" />
       </li>
       <li>
+        <NavbarLink location="/leaderboard" text="Leaderboard" />
+      </li>
+      <li>
         <NavbarLink location="/about" text="About" />
       </li>
       {user.admin && (

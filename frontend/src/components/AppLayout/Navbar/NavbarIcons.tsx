@@ -1,10 +1,16 @@
 import { PropsWithChildren, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { BsGearFill } from "react-icons/bs";
+
 import { FiLogIn, FiLogOut } from "react-icons/fi";
 import { IoSearch } from "react-icons/io5";
-import { FaSun, FaMoon } from "react-icons/fa";
-import { Flex, IconButton, Separator, AlertDialog } from "@radix-ui/themes";
+import { FaSun, FaMoon, FaUserFriends } from "react-icons/fa";
+import {
+  Flex,
+  IconButton,
+  Separator,
+  AlertDialog,
+  Tooltip,
+} from "@radix-ui/themes";
 
 import DarkmodeContext from "src/providers/ThemeProvider";
 import Button from "src/components/ui/Button";
@@ -14,6 +20,7 @@ const NavbarIcons = () => {
   const [darkTheme, setDarkTheme] = useContext(
     DarkmodeContext
   ) as DarkmodeContext;
+
   const navigate = useNavigate();
 
   const user = useAppSelector((state) => state.user);
@@ -38,8 +45,8 @@ const NavbarIcons = () => {
         {darkTheme ? <FaSun size="24" /> : <FaMoon size="24" />}
       </NavbarIcon>
 
-      <NavbarIcon text="Settings">
-        <BsGearFill size="24" />
+      <NavbarIcon text="Friends" path="/friends">
+        <FaUserFriends size="24" />
       </NavbarIcon>
 
       <Separator orientation="vertical" size="2" />
@@ -90,7 +97,7 @@ const NavbarIcons = () => {
           </AlertDialog.Content>
         </AlertDialog.Root>
       ) : (
-        <NavbarIcon onClick={() => navigate("/login")} text="Login">
+        <NavbarIcon path="login" text="Login">
           <FiLogIn size="24" />
         </NavbarIcon>
       )}
@@ -100,27 +107,36 @@ const NavbarIcons = () => {
 
 interface NavbarIconProps extends PropsWithChildren {
   text: string;
-  onClick?: () => void;
+  path?: string;
   className?: string;
+  onClick?: () => void;
   color?: "red";
 }
 
 const NavbarIcon = ({
+  text,
+  path,
   onClick,
   className,
   color,
   children,
-}: NavbarIconProps) => (
-  <IconButton
-    size="3"
-    radius="full"
-    variant="soft"
-    onClick={onClick}
-    className={className + " hover:cursor-pointer"}
-    color={color || undefined}
-  >
-    {children}
-  </IconButton>
-);
+}: NavbarIconProps) => {
+  const navigate = useNavigate();
+
+  return (
+    <Tooltip content={text}>
+      <IconButton
+        size="3"
+        radius="full"
+        variant="soft"
+        onClick={path ? () => navigate(path) : onClick}
+        className={className + " hover:cursor-pointer"}
+        color={color || undefined}
+      >
+        {children}
+      </IconButton>
+    </Tooltip>
+  );
+};
 
 export default NavbarIcons;

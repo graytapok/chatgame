@@ -105,7 +105,6 @@ class TictactoeManager(BaseModel):
 
     def disconnect(self, sid: str):
         opponent = self.get_opponent(sid)
-        game = self.get_game(sid)
 
         res = []
 

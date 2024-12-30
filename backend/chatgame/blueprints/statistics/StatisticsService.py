@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import or_
 
 from chatgame.blueprints.users import UsersService
@@ -10,7 +12,7 @@ from chatgame.extensions import db
 class StatisticsService:
     @staticmethod
     def get_total_statistics_or_throw(total_statistics_id: int) -> TotalStatisticsModel:
-        total_statistics = db.session.get(TotalStatisticsModel, total_statistics_id)
+        total_statistics: TotalStatisticsModel = TotalStatisticsModel.query.get(total_statistics_id)
 
         if total_statistics is None:
             raise NotFoundException("TotalStatistics", str(total_statistics_id))
@@ -64,7 +66,7 @@ class StatisticsService:
         return sub_statistics
 
     @staticmethod
-    def get_user_total_statistics(user_id: str) -> TotalStatisticsModel:
+    def get_user_total_statistics(user_id: str | UUID) -> TotalStatisticsModel:
         user = UsersService.get_user_or_throw(user_id)
 
         total_statistics = db.session.query(TotalStatisticsModel).where(TotalStatisticsModel.user_id == user.id).first()
@@ -90,7 +92,8 @@ class StatisticsService:
             db.session
             .query(UserModel)
             .join(TotalStatisticsModel, TotalStatisticsModel.user_id == UserModel.id)
-            .order_by(TotalStatisticsModel.win_percentage.desc())
+            .where(TotalStatisticsModel.total_games >= 10)
+            .order_by(TotalStatisticsModel.win_percentage.desc(), TotalStatisticsModel.total_games.desc())
             .limit(100)
             .all()
         )

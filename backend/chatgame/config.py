@@ -16,7 +16,7 @@ class Config(BaseSettings):
 
     # General
     DOMAIN: str = "http://localhost:5173"
-    FRIEND_REQUEST_EXPIRATION_IN_MINUTES: int = 15
+    FRIEND_REQUEST_EXPIRATION_IN_MINUTES: int = 60
 
     # ItsDangerous
     ITSDANGEROUS_SECRET_KEY: str

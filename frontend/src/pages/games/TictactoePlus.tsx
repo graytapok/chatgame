@@ -58,7 +58,6 @@ const TictactoePlus = () => {
         <Fields makeMove={manager.makeMove} />
         <Chat
           socket={socket}
-          height="505px"
           loading={
             tictactoePlus.status === "searching" ||
             tictactoePlus.status === undefined

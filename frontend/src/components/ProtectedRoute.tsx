@@ -6,30 +6,30 @@ import { useAppSelector } from "src/hooks";
 interface ProtectedRouteProps extends PropsWithChildren {
   loginRequired?: boolean;
   adminRequired?: boolean;
+  element?: JSX.Element;
 }
 
 const ProtectedRoute = ({
   loginRequired = true,
   adminRequired,
+  element,
   children,
 }: ProtectedRouteProps) => {
   const user = useAppSelector((state) => state.user);
 
   if (adminRequired && !user.admin) {
     return <Navigate to="/" />;
-  } else if (loginRequired && !user.authenticated) {
-    /* toast.error("You must be logged in to access this page!", {
-      toastId: "providerMessage",
-    }); */
-    return <Navigate to="/" />;
-  } else if (!loginRequired && user.authenticated) {
-    /* toast.error("You must be not logged in to access this page!", {
-      toastId: "providerMessage",
-    }); */
+  }
+
+  if (loginRequired && !user.authenticated) {
     return <Navigate to="/" />;
   }
 
-  return children;
+  if (!loginRequired && user.authenticated) {
+    return <Navigate to="/" />;
+  }
+
+  return element ? element : children;
 };
 
 export default ProtectedRoute;

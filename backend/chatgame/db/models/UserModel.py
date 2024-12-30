@@ -3,7 +3,7 @@ from sqlalchemy import Table, Column, ForeignKey
 from sqlalchemy.exc import DataError
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-import uuid
+from uuid import UUID, uuid4
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -21,7 +21,7 @@ friend_table = Table(
 class UserModel(UserMixin, db.Model):
     __tablename__ = "user"
 
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4())
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     username: Mapped[str] = mapped_column(unique=True, nullable=False)
     email: Mapped[str] = mapped_column(nullable=False, unique=True)
     password_hash: Mapped[str]

@@ -30,6 +30,6 @@ def send_friend_request(username: str):
 @bp.patch("/requests/<int:request_id>")
 @login_required
 @validate()
-def answer_friend_request(request_id: int, body: AnswerFriendRequestBody):
-    friend_request = FriendsService.answer_friend_request(current_user, request_id, answer=body.answer)
+def answer_friend_request(request_id: int, query: AnswerFriendRequestBody):
+    friend_request = FriendsService.answer_friend_request(current_user, request_id, answer=query.answer)
     return FriendRequestDto.model_validate(friend_request), 200

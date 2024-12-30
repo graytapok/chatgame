@@ -73,5 +73,6 @@ class FriendsService:
     def get_friend_requests(user: UserModel) -> list[FriendRequestModel]:
         return FriendRequestModel.query.where(
             FriendRequestModel.receiver_id == user.id,
-            FriendRequestModel.status == FriendRequestStatus.IDLE
+            FriendRequestModel.status == FriendRequestStatus.IDLE,
+            datetime.now() < FriendRequestModel.expires_at
         )

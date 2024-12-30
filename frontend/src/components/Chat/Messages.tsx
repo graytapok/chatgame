@@ -19,7 +19,7 @@ const Message = ({ message }: { message: MessageType }) => {
   );
 };
 
-const Messages = ({ height }: { height?: string }) => {
+const Messages = () => {
   const chat = useAppSelector((state) => state.chat);
 
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
@@ -30,13 +30,7 @@ const Messages = ({ height }: { height?: string }) => {
   useEffect(scrollToBottom, [chat.messages]);
 
   return (
-    <ScrollArea
-      dir="rtl"
-      type="auto"
-      scrollbars="vertical"
-      size="2"
-      className={height ? `h-[${height}]` : "h-96"}
-    >
+    <ScrollArea dir="rtl" type="auto" scrollbars="vertical" size="2">
       <Flex direction="column">
         {chat.messages.map((message, i) => (
           <Message message={message} key={i} />

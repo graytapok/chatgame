@@ -10,7 +10,7 @@ interface Props {
 const PageHeading = ({ children, text, title }: Props) => {
   return (
     <>
-      <div className="mt-16 flex justify-center">
+      <div className="mt-16 flex justify-center mb-8">
         <div className="flex justify-center flex-col gap-4 items-center">
           <Heading as="h1" size="9">
             {title}
