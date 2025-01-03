@@ -8,10 +8,10 @@ import {
   Code,
   IconButton,
   Link,
+  Button,
 } from "@radix-ui/themes";
 
-import { useLogout, useLogin } from "src/api/auth";
-import Button from "src/components/ui/Button";
+import { useLogout, useLogin } from "src/hooks/api/auth";
 import { useAppSelector } from "src/hooks";
 
 const HelloIcon: FC = () => "👋";

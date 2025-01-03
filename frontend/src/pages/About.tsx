@@ -1,4 +1,4 @@
-import PageHeading from "src/components/PageHeading";
+import { PageHeading } from "src/components";
 
 function About() {
   return (

@@ -1,10 +1,8 @@
 import { PropsWithChildren } from "react";
 
-import { useAuth } from "src/api/auth";
+import { useAuth } from "src/hooks/api/auth";
 
-const AuthProvider = ({ children }: PropsWithChildren) => {
+export const AuthProvider = ({ children }: PropsWithChildren) => {
   useAuth();
   return children;
 };
-
-export default AuthProvider;

@@ -10,10 +10,10 @@ import {
   Separator,
   AlertDialog,
   Tooltip,
+  Button,
 } from "@radix-ui/themes";
 
 import DarkmodeContext from "src/providers/ThemeProvider";
-import Button from "src/components/ui/Button";
 import { useAppSelector } from "src/hooks";
 
 const NavbarIcons = () => {

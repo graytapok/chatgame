@@ -13,4 +13,6 @@ class SubStatisticsDto(BaseModel):
     draws: int
     losses: int
 
+    win_percentage: float
+
     model_config = ConfigDict(from_attributes=True)

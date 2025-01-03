@@ -6,7 +6,7 @@ interface Props extends PropsWithChildren {
   heading: string;
 }
 
-function CenterCard({ children, className, heading }: Props) {
+export function CenterCard({ children, className, heading }: Props) {
   return (
     <Flex
       justify="center"
@@ -26,5 +26,3 @@ function CenterCard({ children, className, heading }: Props) {
     </Flex>
   );
 }
-
-export default CenterCard;

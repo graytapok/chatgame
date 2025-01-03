@@ -1,13 +1,15 @@
 import { Route, Routes } from "react-router-dom";
 
-import AppLayout from "src/components/AppLayout";
+import { AppLayout } from "src/components";
 
 import Home from "./Home";
 import About from "./About";
 import GameRoutes from "./games";
 import TestRoutes from "./test";
-import AuthRoutes from "./_auth";
+import AuthRoutes from "./(auth)";
 import LeaderboardRoutes from "./leaderboard";
+
+import { NotFound } from "./NotFound";
 
 const AppRoutes = () => (
   <Routes>
@@ -21,7 +23,7 @@ const AppRoutes = () => (
 
       {AuthRoutes()}
 
-      <Route path="*" element={<p>Not Found</p>} />
+      <Route path="*" element={<NotFound />} />
     </Route>
   </Routes>
 );

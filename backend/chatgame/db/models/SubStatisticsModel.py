@@ -1,4 +1,5 @@
-from sqlalchemy import ForeignKey, Enum
+from sqlalchemy import ForeignKey, Enum, case
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatgame.constants import Game
@@ -16,6 +17,17 @@ class SubStatisticsModel(db.Model):
     wins: Mapped[int] = mapped_column(default=0, nullable=False)
     draws: Mapped[int] = mapped_column(default=0, nullable=False)
     losses: Mapped[int] = mapped_column(default=0, nullable=False)
+
+    @hybrid_property
+    def win_percentage(self) -> float:
+        return self.wins / self.games if self.games > 0 else 0
+
+    @win_percentage.expression
+    def win_percentage(cls):
+        return case(
+            (cls.games > 0, cls.wins / cls.games),
+            else_=0
+        )
 
     total_statistics: Mapped["TotalStatisticsModel"] = relationship(back_populates="sub_statistics")
 

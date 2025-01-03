@@ -1,6 +1,6 @@
-import { useLeaderboard } from "src/api/statistics";
-import LeaderboardComponent from "src/components/Leaderboard";
-import PageHeading from "src/components/PageHeading";
+import { useLeaderboard } from "src/hooks/api/statistics";
+import { Leaderboard as LeaderboardComponent } from "src/components";
+import { PageHeading } from "src/components";
 
 export default function Leaderboard() {
   const { data, isLoading } = useLeaderboard();

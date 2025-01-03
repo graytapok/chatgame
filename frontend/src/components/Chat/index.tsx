@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 import { Flex, Spinner } from "@radix-ui/themes";
-import { manager } from "src/api/sockets";
+import { manager } from "src/sockets";
 import { useAppDispatch, useAppSelector } from "src/hooks";
 import {
   addMessage,
@@ -21,7 +21,11 @@ interface Props {
   socket?: Socket;
 }
 
-function Chat({ className, loading = false, socket = chatSocket }: Props) {
+export function Chat({
+  className,
+  loading = false,
+  socket = chatSocket,
+}: Props) {
   const chat = useAppSelector((state) => state.chat);
   const dispatch = useAppDispatch();
 
@@ -64,5 +68,3 @@ const Searching = () => {
     </Flex>
   );
 };
-
-export default Chat;

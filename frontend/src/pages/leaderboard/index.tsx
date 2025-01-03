@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 
 import Leaderboard from "./Leaderboard";
 import FriendsLeaderborad from "./FriendsLeaderborad";
-import ProtectedRoute from "src/components/ProtectedRoute";
+import { ProtectedRoute } from "src/components";
 
 export default function LeaderboardRoutes() {
   return (

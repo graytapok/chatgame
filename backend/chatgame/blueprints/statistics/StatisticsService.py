@@ -1,3 +1,4 @@
+from typing import Literal
 from uuid import UUID
 
 from sqlalchemy import or_
@@ -12,7 +13,7 @@ from chatgame.extensions import db
 class StatisticsService:
     @staticmethod
     def get_total_statistics_or_throw(total_statistics_id: int) -> TotalStatisticsModel:
-        total_statistics: TotalStatisticsModel = TotalStatisticsModel.query.get(total_statistics_id)
+        total_statistics = db.session.query(TotalStatisticsModel).where(TotalStatisticsModel.id == total_statistics_id).first()
 
         if total_statistics is None:
             raise NotFoundException("TotalStatistics", str(total_statistics_id))
@@ -77,14 +78,14 @@ class StatisticsService:
         return total_statistics
 
     @staticmethod
-    def get_user_sub_statistics(total_statistics_id: int, sub_statistics_name: Game):
-        total_statistics = StatisticsService.get_total_statistics_or_throw(total_statistics_id)
+    def get_user_sub_statistics(user_id: str | UUID, sub_statistics_name: Game):
+        total_statistics = StatisticsService.get_user_total_statistics(user_id)
 
         for sub_statistics in total_statistics.sub_statistics:
-            if sub_statistics.name == sub_statistics_name:
+            if sub_statistics.game_name == sub_statistics_name:
                 return sub_statistics
 
-        return StatisticsService.create_sub_statistics(sub_statistics_name, total_statistics)
+        return StatisticsService.create_sub_statistics(sub_statistics_name, total_statistics.id)
 
     @staticmethod
     def get_leaderboard() -> list[UserModel]:
@@ -117,3 +118,18 @@ class StatisticsService:
             return [user]
 
         return best_stats
+
+    @staticmethod
+    def register_played_game(user_id: UUID, game: Game, outcome: Literal["win", "loss", "draw"]):
+        sub_statistics = StatisticsService.get_user_sub_statistics(user_id, game)
+
+        sub_statistics.games += 1
+
+        if outcome == "win":
+            sub_statistics.wins += 1
+        elif outcome == "loss":
+            sub_statistics.losses += 1
+        elif outcome == "draw":
+            sub_statistics.draws += 1
+
+        db.session.commit()

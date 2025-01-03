@@ -1,16 +1,12 @@
-import { Card, Spinner } from "@radix-ui/themes";
-import { LeaderboardData } from "src/api/statistics";
+import { Card } from "@radix-ui/themes";
+import { LeaderboardData } from "src/hooks/api/statistics";
 
 interface LeaderboardPorps {
   isLoading: boolean;
   data: LeaderboardData[] | undefined;
 }
 
-interface LeaderboardRowProps {
-  place: number;
-}
-
-export default function Leaderboard({ data, isLoading }: LeaderboardPorps) {
+export function Leaderboard({ data }: LeaderboardPorps) {
   return (
     <>
       <div>
@@ -29,8 +25,4 @@ export default function Leaderboard({ data, isLoading }: LeaderboardPorps) {
       </Card>
     </>
   );
-}
-
-function LeaderboardRow() {
-  return <div>Leaderboard</div>;
 }

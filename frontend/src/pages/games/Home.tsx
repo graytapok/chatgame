@@ -1,6 +1,6 @@
 import { Flex, Separator } from "@radix-ui/themes";
-import PageHeading from "src/components/PageHeading";
-import Link from "src/components/ui/Link";
+import { PageHeading } from "src/components";
+import { Link } from "src/components/ui";
 
 function GameHome() {
   return (

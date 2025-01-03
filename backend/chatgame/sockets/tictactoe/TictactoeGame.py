@@ -10,7 +10,7 @@ class TictactoeGame(BaseModel):
     status: Literal["playing", "finished"] = "playing"
     turn: Literal["X", "O"] | None = "X"
 
-    def check_winner(self):
+    def check_winner(self) -> Literal["X", "O", "draw"] | None:
         for symbol in ["X", "O"]:
             for i in tictactoe_possible_wins:
                 if self.fields[i[0]] == self.fields[i[1]] == self.fields[i[2]] == symbol:

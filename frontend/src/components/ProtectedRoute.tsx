@@ -9,7 +9,7 @@ interface ProtectedRouteProps extends PropsWithChildren {
   element?: JSX.Element;
 }
 
-const ProtectedRoute = ({
+export const ProtectedRoute = ({
   loginRequired = true,
   adminRequired,
   element,
@@ -31,5 +31,3 @@ const ProtectedRoute = ({
 
   return element ? element : children;
 };
-
-export default ProtectedRoute;

@@ -1,9 +1,12 @@
 from random import randint
-
+from typing import Literal
+from uuid import UUID
 from pydantic import BaseModel
 
-from chatgame.sockets.tictactoe.TictactoeGame import TictactoeGame
-from chatgame.sockets.tictactoe.Player import Player
+from chatgame.blueprints.statistics import StatisticsService
+from .TictactoeGame import TictactoeGame
+from .Player import Player
+from ...constants import Game
 
 
 class TictactoeManager(BaseModel):
@@ -11,12 +14,12 @@ class TictactoeManager(BaseModel):
     players: dict[str, Player] = {}
     games: dict[str, TictactoeGame] = {}
 
-    def add_player(self, sid: str, username: str | None):
+    def add_player(self, sid: str, username: str | None, user_id: UUID | None):
         if not username:
             username = f"Guest{randint(1000, 9999)}"
 
         self.players.update({
-            sid: Player(sid=sid, username=username, opponent_id=self.unmatched_player_id)
+            sid: Player(sid=sid, username=username, user_id=user_id, opponent_id=self.unmatched_player_id)
         })
 
         if self.unmatched_player_id is None:
@@ -67,6 +70,19 @@ class TictactoeManager(BaseModel):
 
         if winner := game.check_winner():
             game.status = "finished"
+
+            player_outcome: Literal["win", "loss", "draw"] = "draw"
+            opponent_outcome: Literal["win", "loss", "draw"] = "draw"
+
+            if player.symbol == winner:
+                player_outcome = "win"
+                opponent_outcome = "loss"
+            elif opponent.symbol == winner:
+                player_outcome = "loss"
+                opponent_outcome = "win"
+
+            StatisticsService.register_played_game(player.user_id, Game.TICTACTOE, player_outcome)
+            StatisticsService.register_played_game(opponent.user_id, Game.TICTACTOE, opponent_outcome)
 
             return {"winner": winner}
 

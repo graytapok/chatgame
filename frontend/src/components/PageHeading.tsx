@@ -7,7 +7,7 @@ interface Props {
   text: string;
 }
 
-const PageHeading = ({ children, text, title }: Props) => {
+export const PageHeading = ({ children, text, title }: Props) => {
   return (
     <>
       <div className="mt-16 flex justify-center mb-8">
@@ -22,5 +22,3 @@ const PageHeading = ({ children, text, title }: Props) => {
     </>
   );
 };
-
-export default PageHeading;

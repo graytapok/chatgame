@@ -30,7 +30,7 @@ interface Props {
   children?: ReactNode;
 }
 
-const InputField = (p: Props) => {
+export const InputField = (p: Props) => {
   const [visible, setVisible] = useState(false);
 
   const toggleVisibility = () => {
@@ -74,5 +74,3 @@ const InputField = (p: Props) => {
     </>
   );
 };
-
-export default InputField;

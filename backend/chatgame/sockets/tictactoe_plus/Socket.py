@@ -11,13 +11,15 @@ class Socket(Namespace):
         sid = request.sid
 
         username = None
+        user_id = None
 
         if current_user.is_authenticated:
             username = current_user.username
+            user_id = current_user.id
 
         unmatched_before = manager.unmatched_player_id
 
-        manager.add_player(sid, username)
+        manager.add_player(sid, username, user_id)
 
         if unmatched_before is not None:
             manager.setup_game(sid)

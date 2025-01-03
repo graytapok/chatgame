@@ -1,6 +1,6 @@
 import { SegmentedControl } from "@radix-ui/themes";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
-import PageHeading from "src/components/PageHeading";
+import { PageHeading } from "src/components";
 
 const pages: string[] = ["query", "fetch", "chat"];
 

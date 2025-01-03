@@ -1,4 +1,4 @@
-import Chat from "src/components/Chat";
+import { Chat } from "src/components";
 
 function TestChat() {
   return <Chat />;
