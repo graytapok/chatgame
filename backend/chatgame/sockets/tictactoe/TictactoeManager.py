@@ -14,12 +14,12 @@ class TictactoeManager(BaseModel):
     players: dict[str, Player] = {}
     games: dict[str, TictactoeGame] = {}
 
-    def add_player(self, sid: str, username: str | None, user_id: UUID | None):
+    def add_player(self, sid: str, username: str | None, user_id: UUID | None, elo: int | None):
         if not username:
             username = f"Guest{randint(1000, 9999)}"
 
         self.players.update({
-            sid: Player(sid=sid, username=username, user_id=user_id, opponent_id=self.unmatched_player_id)
+            sid: Player(sid=sid, username=username, user_id=user_id, opponent_id=self.unmatched_player_id, elo=elo)
         })
 
         if self.unmatched_player_id is None:
@@ -69,22 +69,7 @@ class TictactoeManager(BaseModel):
         game.fields[move] = player.symbol
 
         if winner := game.check_winner():
-            game.status = "finished"
-
-            player_outcome: Literal["win", "loss", "draw"] = "draw"
-            opponent_outcome: Literal["win", "loss", "draw"] = "draw"
-
-            if player.symbol == winner:
-                player_outcome = "win"
-                opponent_outcome = "loss"
-            elif opponent.symbol == winner:
-                player_outcome = "loss"
-                opponent_outcome = "win"
-
-            StatisticsService.register_played_game(player.user_id, Game.TICTACTOE, player_outcome)
-            StatisticsService.register_played_game(opponent.user_id, Game.TICTACTOE, opponent_outcome)
-
-            return {"winner": winner}
+            return self.game_over(player, opponent, game, Game.TICTACTOE, winner)
 
         return {"success": True}
 
@@ -140,6 +125,37 @@ class TictactoeManager(BaseModel):
             self.unmatched_player_id = None
 
         return res
+
+    def game_over(self, player: Player, opponent: Player, game, game_name: Game, winner: Literal["X", "O", "draw"]):
+        game.status = "finished"
+
+        player_outcome: Literal["win", "loss", "draw"] = "draw"
+        opponent_outcome: Literal["win", "loss", "draw"] = "draw"
+
+        if player.symbol == winner:
+            player_outcome = "win"
+            opponent_outcome = "loss"
+        elif opponent.symbol == winner:
+            player_outcome = "loss"
+            opponent_outcome = "win"
+
+        player_elo = None
+        opponent_elo = None
+
+        if player.user_id:
+            player_elo = StatisticsService.register_played_game(player.user_id, game_name, player_outcome)
+
+        if opponent.user_id:
+            opponent_elo = StatisticsService.register_played_game(opponent.user_id, game_name, opponent_outcome)
+
+        X_elo = player_elo if player.symbol == "X" else opponent_elo
+        O_elo = player_elo if player.symbol == "O" else opponent_elo
+
+        return {
+            "winner": winner,
+            "X_elo": X_elo,
+            "O_elo": O_elo
+        }
 
     def get_opponent(self, sid: str):
         if sid not in self.players:

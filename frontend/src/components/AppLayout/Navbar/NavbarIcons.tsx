@@ -1,5 +1,5 @@
 import { PropsWithChildren, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 import { FiLogIn, FiLogOut } from "react-icons/fi";
 import { IoSearch } from "react-icons/io5";
@@ -97,7 +97,7 @@ const NavbarIcons = () => {
           </AlertDialog.Content>
         </AlertDialog.Root>
       ) : (
-        <NavbarIcon path="login" text="Login">
+        <NavbarIcon path="/login" text="Login">
           <FiLogIn size="24" />
         </NavbarIcon>
       )}

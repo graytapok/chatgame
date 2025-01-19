@@ -9,16 +9,16 @@ import { RoutingProvider } from "./RoutingProvider";
 
 const Providers = () => {
   return (
-    <ThemeProvider>
+    <ReduxProvider store={store}>
       <QueryProvider>
-        <ReduxProvider store={store}>
-          <AuthProvider>
+        <AuthProvider>
+          <ThemeProvider>
             <RoutingProvider />
             <ToastProvider />
-          </AuthProvider>
-        </ReduxProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </QueryProvider>
-    </ThemeProvider>
+    </ReduxProvider>
   );
 };
 

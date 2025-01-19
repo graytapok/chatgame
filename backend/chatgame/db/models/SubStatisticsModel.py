@@ -17,6 +17,7 @@ class SubStatisticsModel(db.Model):
     wins: Mapped[int] = mapped_column(default=0, nullable=False)
     draws: Mapped[int] = mapped_column(default=0, nullable=False)
     losses: Mapped[int] = mapped_column(default=0, nullable=False)
+    elo: Mapped[int] = mapped_column(default=0, nullable=False)
 
     @hybrid_property
     def win_percentage(self) -> float:

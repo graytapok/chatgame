@@ -1,5 +1,5 @@
 import { ReloadIcon, ResetIcon } from "@radix-ui/react-icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { Flex, Button } from "@radix-ui/themes";
 import { LuSwords } from "react-icons/lu";
 

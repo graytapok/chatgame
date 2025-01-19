@@ -1,5 +1,5 @@
 import { AxiosError, AxiosResponse } from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { Flex, Checkbox, Text, Callout, Button } from "@radix-ui/themes";
 import {

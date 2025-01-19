@@ -11,3 +11,4 @@ class Player(BaseModel):
     user_id: UUID | None = None
     opponent_id: str | None
     symbol: Literal["X", "O"] = "X"
+    elo: int | None = None

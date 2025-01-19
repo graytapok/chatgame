@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router";
 
 import TestChat from "./Chat";
 import TestQuery from "./Query";

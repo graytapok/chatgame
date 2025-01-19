@@ -12,6 +12,7 @@ class SubStatisticsDto(BaseModel):
     wins: int
     draws: int
     losses: int
+    elo: int
 
     win_percentage: float
 

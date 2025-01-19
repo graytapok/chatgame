@@ -1,5 +1,5 @@
 import { Button } from "@radix-ui/themes";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 import { PageHeading } from "src/components";
 

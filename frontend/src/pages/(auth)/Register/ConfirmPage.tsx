@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { AxiosError } from "axios";
 import { useContext, useEffect, useState } from "react";
 import { EnterIcon, HomeIcon } from "@radix-ui/react-icons";

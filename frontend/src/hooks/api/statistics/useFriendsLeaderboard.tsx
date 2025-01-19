@@ -1,13 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "..";
-import { LeaderboardData } from "./useLeaderboard";
+import { LeaderboardData, UseLeaderboardParams } from "./useLeaderboard";
 
-export default function useFriendsLeaderboard() {
+export function useFriendsLeaderboard({ page, perPage }: UseLeaderboardParams) {
   return useQuery({
     queryFn: async () => {
-      const { data } = await apiClient.get("/statistics/leaderboard/friends");
-      return data as LeaderboardData[];
+      const { data } = await apiClient.get(`/statistics/leaderboard/friends`, {
+        params: {
+          p: page,
+          per: perPage,
+        },
+      });
+      return data as LeaderboardData;
     },
-    queryKey: ["statistics", "leaderboard", "friends"],
+    queryKey: ["statistics", "leaderboard", page, perPage],
   });
 }

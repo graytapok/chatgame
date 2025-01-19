@@ -1,9 +1,9 @@
 import {
   createBrowserRouter,
   createRoutesFromElements,
-  RouterProvider,
   Route,
-} from "react-router-dom";
+  RouterProvider,
+} from "react-router";
 
 import AppRoutes from "src/pages";
 

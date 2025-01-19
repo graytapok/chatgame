@@ -1,4 +1,4 @@
-import { Route } from "react-router-dom";
+import { Route } from "react-router";
 
 import { ProtectedRoute } from "src/components";
 import ForgotPassword from "./ForgotPassword";

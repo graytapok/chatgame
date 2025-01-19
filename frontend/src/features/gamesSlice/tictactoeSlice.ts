@@ -1,9 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export interface Opponent {
+export type Rematch = "requested" | "accepted" | "rejected" | "recieved";
+
+export type Status = "searching" | "active" | "finished";
+
+export interface Player {
   username: string;
   symbol: string;
-  left?: boolean;
+  left: boolean;
+  elo?: number;
+  diffElo?: number;
 }
 
 export interface Field {
@@ -16,30 +22,36 @@ export type Winner = "draw" | "X" | "O";
 export type Symbol = "X" | "O";
 
 export interface TictactoeState {
-  playerSymbol: string;
-  opponent: Opponent;
-  status: "searching" | "active" | "finished";
+  opponent: Player;
+  player: Player;
+
+  status: Status;
   turn: Symbol;
   fields: Field[];
   winner: Winner;
-  rematch: "requested" | "accepted" | "rejected" | "recieved";
+  rematch: Rematch;
   nextGame: number;
 }
 
 export interface GameBeginProps {
-  playerSymbol: string;
-  opponent: Opponent;
-  turn: Symbol;
+  opponent: Player;
+  player: Player;
 }
 
 export interface RematchProps {
-  type: "requested" | "recieved" | "accepted" | "rejected";
+  type: Rematch;
 }
 
-interface MadeMoveProps {
+export interface MadeMoveProps {
   turn: Symbol;
   position: number;
   symbol: Symbol;
+}
+
+export interface GameOverProps {
+  winner: Winner;
+  diffXElo?: number;
+  diffOElo?: number;
 }
 
 const initialState: Partial<TictactoeState> = {};
@@ -49,9 +61,9 @@ export const tictactoeSlice = createSlice({
   initialState,
   reducers: {
     gameBegin: (state, { payload: p }: PayloadAction<GameBeginProps>) => {
-      state.playerSymbol = p.playerSymbol;
       state.opponent = { ...p.opponent, left: false };
-      state.turn = p.turn;
+      state.player = { ...p.player, left: false };
+      state.turn = "X";
       state.status = "active";
       state.fields = [];
 
@@ -59,9 +71,17 @@ export const tictactoeSlice = createSlice({
         state.fields.push({ id: i });
       }
     },
-    gameOver: (state, { payload: p }: PayloadAction<{ winner: Winner }>) => {
+    gameOver: (state, { payload: p }: PayloadAction<GameOverProps>) => {
       state.status = "finished";
       state.winner = p.winner;
+
+      if (state.player?.symbol == "X") {
+        state.player.diffElo = p.diffXElo;
+        state.opponent!.diffElo = p.diffOElo;
+      } else {
+        state.player!.diffElo = p.diffOElo;
+        state.opponent!.diffElo = p.diffXElo;
+      }
     },
     madeMove: (state, { payload: p }: PayloadAction<MadeMoveProps>) => {
       state.turn = p.turn;
@@ -92,7 +112,24 @@ export const tictactoeSlice = createSlice({
 
         case "accepted":
           state.status = "active";
-          state.playerSymbol = state.playerSymbol === "X" ? "O" : "X";
+          state.player!.symbol = state.player?.symbol === "X" ? "O" : "X";
+
+          if (
+            state.player?.elo !== undefined &&
+            state.player?.diffElo !== undefined
+          ) {
+            state.player.elo += state.player.diffElo;
+          }
+
+          if (
+            state.opponent?.elo !== undefined &&
+            state.opponent?.diffElo !== undefined
+          ) {
+            state.opponent.elo += state.opponent.diffElo;
+          }
+
+          state.player!.diffElo = undefined;
+          state.opponent!.diffElo = undefined;
           state.winner = undefined;
           state.rematch = undefined;
           state.turn = "X";

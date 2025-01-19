@@ -1,8 +1,5 @@
-from typing import Literal
-
 from .TictactoePlusGame import TictactoePlusGame
 from ..tictactoe import TictactoeManager
-from ...blueprints.statistics import StatisticsService
 from ...constants import Game
 
 
@@ -68,22 +65,7 @@ class TictactoePlusManager(TictactoeManager):
             })
 
         if winner := game.check_winner():
-            game.status = "finished"
-
-            player_outcome: Literal["win", "loss", "draw"] = "draw"
-            opponent_outcome: Literal["win", "loss", "draw"] = "draw"
-
-            if player.symbol == winner:
-                player_outcome = "win"
-                opponent_outcome = "loss"
-            elif opponent.symbol == winner:
-                player_outcome = "loss"
-                opponent_outcome = "win"
-
-            StatisticsService.register_played_game(player.user_id, Game.TICTACTOE_PLUS, player_outcome)
-            StatisticsService.register_played_game(opponent.user_id, Game.TICTACTOE_PLUS, opponent_outcome)
-
-            res.update({"winner": winner})
+            res.update(self.game_over(player, opponent, game, Game.TICTACTOE_PLUS, winner))
 
         game.turn.symbol = "X" if player.symbol == "O" else "O"
 

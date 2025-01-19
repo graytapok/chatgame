@@ -96,13 +96,10 @@ class UsersService:
 
     @staticmethod
     def get_user_or_throw(user_id: str | UUID) -> UserModel:
-        user: UserModel | None = None
+        user = UserModel.query.where(UserModel.id == user_id).first()
 
-        try:
-            user = db.session.get(UserModel, user_id)
-        finally:
-            if user is None:
-                raise NotFoundException("User", user_id)
+        if user is None:
+            raise NotFoundException("User", user_id)
 
         return user
 

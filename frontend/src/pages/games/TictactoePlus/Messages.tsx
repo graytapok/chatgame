@@ -2,7 +2,7 @@ import { Flex, Text } from "@radix-ui/themes";
 import { useAppSelector } from "src/hooks";
 
 const Messages = () => {
-  const { playerSymbol, winner, turn, opponent } = useAppSelector(
+  const { player, winner, turn, opponent } = useAppSelector(
     (state) => state.games.tictactoePlus
   );
   return (
@@ -14,13 +14,13 @@ const Messages = () => {
           <Text size="6">Draw!</Text>
         ) : (
           <Text size="6">
-            {winner === playerSymbol ? "You won!" : "You lost!"}
+            {winner === player?.symbol ? "You won!" : "You lost!"}
           </Text>
         )
       ) : turn ? (
         <Flex direction={"column"} className="text-center">
           <Text size="6">
-            {turn.symbol === playerSymbol
+            {turn.symbol === player?.symbol
               ? "Your turn!"
               : opponent?.username + " moves!"}
           </Text>

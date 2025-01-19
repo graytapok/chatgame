@@ -1,5 +1,5 @@
 import { Text } from "@radix-ui/themes";
-import { NavLink, NavLinkProps } from "react-router-dom";
+import { NavLink, NavLinkProps } from "react-router";
 
 interface LinkProps extends NavLinkProps {
   to: string;

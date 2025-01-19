@@ -2,7 +2,7 @@ import { InfoCircledIcon, PersonIcon } from "@radix-ui/react-icons";
 import { TextField, Blockquote, Callout, Text, Button } from "@radix-ui/themes";
 import { AxiosError, AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 
 import { useResend } from "src/hooks/api/auth";
 import { CenterCard } from "src/components/ui";

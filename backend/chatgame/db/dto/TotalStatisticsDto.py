@@ -13,6 +13,7 @@ class TotalStatisticsDto(BaseModel):
     total_wins: int
     total_draws: int
     total_losses: int
+    total_elo: int
 
     win_percentage: float
 

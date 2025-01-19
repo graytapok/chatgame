@@ -8,7 +8,6 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from chatgame.extensions import db
 from chatgame.db.models import SubStatisticsModel
 
-
 class TotalStatisticsModel(db.Model):
     __tablename__ = "total_statistics"
 
@@ -20,6 +19,7 @@ class TotalStatisticsModel(db.Model):
     total_wins: Mapped[int] = mapped_column(default=0, nullable=False)
     total_draws: Mapped[int] = mapped_column(default=0, nullable=False)
     total_losses: Mapped[int] = mapped_column(default=0, nullable=False)
+    total_elo: Mapped[int] = mapped_column(default=0, nullable=False)
 
     @hybrid_property
     def win_percentage(self) -> float:
@@ -33,7 +33,10 @@ class TotalStatisticsModel(db.Model):
         )
 
     user: Mapped["UserModel"] = relationship(back_populates="statistics")
-    sub_statistics: Mapped[List["SubStatisticsModel"]] = relationship(back_populates="total_statistics", cascade="all, delete")
+    sub_statistics: Mapped[List["SubStatisticsModel"]] = relationship(
+        back_populates="total_statistics",
+        cascade="all, delete"
+    )
 
     def __init__(self, user_id: UUID):
         self.user_id = user_id

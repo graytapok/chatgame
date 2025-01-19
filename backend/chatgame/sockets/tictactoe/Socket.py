@@ -3,6 +3,9 @@ from flask_login import current_user
 from flask_socketio import join_room, emit, close_room, Namespace
 
 from .TictactoeManager import TictactoeManager
+from ...blueprints.statistics import StatisticsService
+from ...constants import Game
+
 
 class Socket(Namespace):
     def __init__(self, namespace: str | None = None):
@@ -17,11 +20,13 @@ class Socket(Namespace):
         if current_user.is_authenticated:
             username = current_user.username
             user_id = current_user.id
+            elo = StatisticsService.get_user_sub_statistics(user_id, Game.TICTACTOE).elo
         else:
             username = None
             user_id = None
+            elo = None
 
-        self.manager.add_player(sid, user_id=user_id, username=username)
+        self.manager.add_player(sid, user_id=user_id, username=username, elo=elo)
 
         if unmatched_before is not None:
             self.manager.setup_game(sid)
@@ -39,9 +44,14 @@ class Socket(Namespace):
                     "room": room,
                     "opponent": {
                         "symbol": player.symbol,
-                        "username": player.username
+                        "username": player.username,
+                        "elo": player.elo
                     },
-                    "symbol": opponent.symbol
+                    "player": {
+                        "symbol": opponent.symbol,
+                        "username": opponent.username,
+                        "elo": opponent.elo
+                    },
                 },
                 json=True,
                 to=opponent.sid
@@ -53,9 +63,14 @@ class Socket(Namespace):
                     "room": room,
                     "opponent": {
                         "symbol": opponent.symbol,
-                        "username": opponent.username
+                        "username": opponent.username,
+                        "elo": opponent.elo
                     },
-                    "symbol": player.symbol
+                    "player": {
+                        "symbol": player.symbol,
+                        "username": player.username,
+                        "elo": player.elo
+                    },
                 },
                 json=True,
                 to=sid
@@ -114,7 +129,7 @@ class Socket(Namespace):
             )
 
             if "winner" in res:
-                emit("game_over", {"winner": res["winner"]}, json=True, to=room)
+                emit("game_over", res, json=True, to=room)
 
     def on_rematch(self, decision: bool = True):
         sid = request.sid

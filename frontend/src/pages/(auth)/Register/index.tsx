@@ -1,5 +1,5 @@
 import { useState, createContext, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 
 import RegisterConfirm from "src/pages/(auth)/Register/ConfirmPage";
 import RegisterForm from "src/pages/(auth)/Register/Form";

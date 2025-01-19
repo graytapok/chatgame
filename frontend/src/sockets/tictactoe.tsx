@@ -7,23 +7,18 @@ import {
   gameBegin,
   gameOver,
   madeMove,
-  Opponent,
+  MadeMoveProps,
   opponentLeft,
   rematch,
-  Symbol,
   Winner,
+  GameBeginProps,
 } from "src/features/gamesSlice/tictactoeSlice";
 import { addMessage } from "src/features/chatSlice";
 
-export interface OnGameBeginResponse {
-  symbol: string;
-  opponent: Opponent;
-}
-
-interface OnMadeMoveResponse {
-  turn: Symbol;
-  position: number;
-  symbol: Symbol;
+export interface OnGameOverResponse {
+  winner: Winner;
+  X_elo?: number;
+  O_elo?: number;
 }
 
 export class TictactoeSocket {
@@ -50,14 +45,8 @@ export class TictactoeSocket {
     this.socket.emit("rematch");
   };
 
-  onGameBegin = (data: OnGameBeginResponse) => {
-    store.dispatch(
-      gameBegin({
-        playerSymbol: data.symbol,
-        opponent: data.opponent,
-        turn: "X",
-      })
-    );
+  onGameBegin = (data: GameBeginProps) => {
+    store.dispatch(gameBegin(data));
     store.dispatch(
       addMessage({
         type: "info",
@@ -68,11 +57,17 @@ export class TictactoeSocket {
     );
   };
 
-  onGameOver = (data: { winner: Winner }) => {
-    store.dispatch(gameOver({ winner: data.winner }));
+  onGameOver = (data: OnGameOverResponse) => {
+    store.dispatch(
+      gameOver({
+        winner: data.winner,
+        diffXElo: data.X_elo,
+        diffOElo: data.O_elo,
+      })
+    );
   };
 
-  onMadeMove = (data: OnMadeMoveResponse) => {
+  onMadeMove = (data: MadeMoveProps) => {
     store.dispatch(madeMove(data));
   };
 
@@ -95,6 +90,7 @@ export class TictactoeSocket {
 
   onRematchRequest = () => {
     store.dispatch(rematch({ type: "recieved" }));
+
     toast.info(
       <Flex className="flex-col">
         <Text>Rematch request received!</Text>

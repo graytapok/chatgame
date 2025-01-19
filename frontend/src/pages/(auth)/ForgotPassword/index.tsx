@@ -1,5 +1,5 @@
 import { createContext, Dispatch, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 
 import { ProtectedRoute } from "src/components";
 

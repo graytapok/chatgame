@@ -1,6 +1,8 @@
-from typing import Literal
 from uuid import UUID
+from typing import Literal
+from random import randint
 
+from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy import or_
 
 from chatgame.blueprints.users import UsersService
@@ -88,48 +90,90 @@ class StatisticsService:
         return StatisticsService.create_sub_statistics(sub_statistics_name, total_statistics.id)
 
     @staticmethod
-    def get_leaderboard() -> list[UserModel]:
-        best_stats = (
+    def get_leaderboard_top_3() -> list[UserModel]:
+        return (
             db.session
             .query(UserModel)
             .join(TotalStatisticsModel, TotalStatisticsModel.user_id == UserModel.id)
-            .where(TotalStatisticsModel.total_games >= 10)
-            .order_by(TotalStatisticsModel.win_percentage.desc(), TotalStatisticsModel.total_games.desc())
-            .limit(100)
+            .filter(TotalStatisticsModel.total_games >= 10)
+            .order_by(TotalStatisticsModel.total_elo.desc(), TotalStatisticsModel.total_wins.desc())
+            .limit(3)
             .all()
         )
 
-        return best_stats
-
     @staticmethod
-    def get_friends_leaderboard(user: UserModel) -> list[UserModel]:
-        best_stats: list[UserModel] = (
+    def get_friends_leaderboard_top_3(user: UserModel) -> list[UserModel]:
+        return (
             db.session
             .query(UserModel)
             .join(friend_table, friend_table.c.friend_id == UserModel.id)
             .where(or_(friend_table.c.user_id == user.id, UserModel.id == user.id))
             .join(TotalStatisticsModel, TotalStatisticsModel.user_id == UserModel.id)
-            .order_by(TotalStatisticsModel.win_percentage.desc())
-            .limit(100)
+            .order_by(TotalStatisticsModel.total_elo.desc(), TotalStatisticsModel.total_wins.desc())
+            .limit(3)
             .all()
         )
 
-        if not best_stats:
-            return [user]
+    @staticmethod
+    def get_leaderboard(page: int, per_page: int) -> Pagination:
+        best_stats: Pagination = (
+            db.session
+            .query(UserModel)
+            .join(TotalStatisticsModel, TotalStatisticsModel.user_id == UserModel.id)
+            .filter(TotalStatisticsModel.total_games >= 10)
+            .order_by(TotalStatisticsModel.total_elo.desc(), TotalStatisticsModel.total_wins.desc())
+            .paginate(page=page, per_page=per_page, error_out=False)
+        )
 
         return best_stats
 
     @staticmethod
-    def register_played_game(user_id: UUID, game: Game, outcome: Literal["win", "loss", "draw"]):
+    def get_friends_leaderboard(user: UserModel, page: int, per_page: int) -> Pagination:
+        best_stats: Pagination = (
+            db.session
+            .query(UserModel)
+            .join(friend_table, friend_table.c.friend_id == UserModel.id)
+            .where(or_(friend_table.c.user_id == user.id, UserModel.id == user.id))
+            .join(TotalStatisticsModel, TotalStatisticsModel.user_id == UserModel.id)
+            .order_by(TotalStatisticsModel.total_elo.desc(), TotalStatisticsModel.total_wins.desc())
+            .paginate(page=page, per_page=per_page, error_out=False)
+        )
+
+        return best_stats
+
+    @staticmethod
+    def generate_elo():
+        percent = randint(1, 100)
+
+        if 1 <= percent <= 70:
+            return randint(10, 15)  # 70% 10-15
+        elif 71 < percent <= 90:
+            return randint(16, 20)  # 20% 16-20
+        else:
+            return randint(21, 25)  # 10% 21-25
+
+    @staticmethod
+    def register_played_game(user_id: UUID, game: Game, outcome: Literal["win", "loss", "draw"]) -> int | None:
         sub_statistics = StatisticsService.get_user_sub_statistics(user_id, game)
 
         sub_statistics.games += 1
 
+        elo = StatisticsService.generate_elo()
+
         if outcome == "win":
             sub_statistics.wins += 1
-        elif outcome == "loss":
-            sub_statistics.losses += 1
-        elif outcome == "draw":
-            sub_statistics.draws += 1
+            sub_statistics.elo += elo
 
+            db.session.commit()
+            return elo
+
+        if outcome == "loss":
+            sub_statistics.losses += 1
+            sub_statistics.elo = sub_statistics.elo - elo if sub_statistics.elo > elo else 0
+
+            db.session.commit()
+            return -elo
+
+        sub_statistics.draws += 1
         db.session.commit()
+        return 0

@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate } from "react-router";
 import { PropsWithChildren } from "react";
 
 import { useAppSelector } from "src/hooks";

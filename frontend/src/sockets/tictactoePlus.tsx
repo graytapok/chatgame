@@ -4,35 +4,18 @@ import { toast } from "react-toastify";
 
 import { store } from "src/store";
 import {
-  Opponent,
-  Turn,
-  Winner,
   gameBegin,
   gameOver,
   madeMove,
   opponentLeft,
   rematch,
-  Symbol,
   fieldWinner,
+  MadeMoveProps,
+  FieldWinnerProps,
 } from "src/features/gamesSlice/tictactoePlusSlice";
 import { addMessage } from "src/features/chatSlice";
-
-interface OnGameBeginProps {
-  symbol: string;
-  opponent: Opponent;
-}
-
-interface OnMadeMoveProps {
-  field: number;
-  subField: number;
-  symbol: Symbol;
-  turn: Turn;
-}
-
-interface OnFieldWinnerProps {
-  field: number;
-  symbol: Symbol;
-}
+import { GameBeginProps } from "src/features/gamesSlice/tictactoeSlice";
+import { OnGameOverResponse } from "./tictactoe";
 
 export class TictactoePlusSocket {
   socket: Socket;
@@ -58,14 +41,8 @@ export class TictactoePlusSocket {
     this.socket.emit("rematch");
   };
 
-  onGameBegin = (data: OnGameBeginProps) => {
-    store.dispatch(
-      gameBegin({
-        playerSymbol: data.symbol,
-        opponent: data.opponent,
-        turn: { symbol: "X" },
-      })
-    );
+  onGameBegin = (data: GameBeginProps) => {
+    store.dispatch(gameBegin(data));
     store.dispatch(
       addMessage({
         type: "info",
@@ -76,15 +53,21 @@ export class TictactoePlusSocket {
     );
   };
 
-  onGameOver = (data: { winner: Winner }) => {
-    store.dispatch(gameOver({ winner: data.winner }));
+  onGameOver = (data: OnGameOverResponse) => {
+    store.dispatch(
+      gameOver({
+        winner: data.winner,
+        diffXElo: data.X_elo,
+        diffOElo: data.O_elo,
+      })
+    );
   };
 
-  onMadeMove = (data: OnMadeMoveProps) => {
+  onMadeMove = (data: MadeMoveProps) => {
     store.dispatch(madeMove(data));
   };
 
-  onFieldWinner = (data: OnFieldWinnerProps) => {
+  onFieldWinner = (data: FieldWinnerProps) => {
     store.dispatch(fieldWinner(data));
   };
 

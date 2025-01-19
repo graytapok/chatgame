@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { HomeIcon } from "@radix-ui/react-icons";
 import { Blockquote, Button } from "@radix-ui/themes";
 
