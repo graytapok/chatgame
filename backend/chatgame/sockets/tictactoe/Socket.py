@@ -11,11 +11,9 @@ class Socket(Namespace):
     def __init__(self, namespace: str | None = None):
         self.manager = TictactoeManager()
         super().__init__(namespace)
-    
+
     def on_connect(self):
         sid = request.sid
-
-        unmatched_before = self.manager.unmatched_player_id
 
         if current_user.is_authenticated:
             username = current_user.username
@@ -28,7 +26,7 @@ class Socket(Namespace):
 
         self.manager.add_player(sid, user_id=user_id, username=username, elo=elo)
 
-        if unmatched_before is not None:
+        if sid not in self.manager.unmatched_players:
             self.manager.setup_game(sid)
 
             room = self.manager.get_room(sid)
@@ -167,6 +165,9 @@ class Socket(Namespace):
 
         if "emit" in res:
             emit("opponent_left", to=opponent.sid)
+
+        if "elo" in res:
+            emit("game_over", res["elo"], json=True, to=room)
 
         if "close" in res:
             close_room(room)

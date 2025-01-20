@@ -12,6 +12,7 @@ import {
   fieldWinner,
   MadeMoveProps,
   FieldWinnerProps,
+  reset,
 } from "src/features/gamesSlice/tictactoePlusSlice";
 import { addMessage } from "src/features/chatSlice";
 import { GameBeginProps } from "src/features/gamesSlice/tictactoeSlice";
@@ -24,8 +25,36 @@ export class TictactoePlusSocket {
     this.socket = socket;
   }
 
+  connectSockets = (socket: Socket) => {
+    socket.connect();
+
+    socket.on("made_move", this.onMadeMove);
+    socket.on("game_over", this.onGameOver);
+    socket.on("game_begin", this.onGameBegin);
+    socket.on("field_winner", this.onFieldWinner);
+    socket.on("opponent_left", this.onOpponentLeft);
+    socket.on("rematch_accepted", this.onRematchAccepted);
+    socket.on("rematch_rejected", this.onRematchRejected);
+    socket.on("rematch_request", this.onRematchRequest);
+  };
+
+  removeSockets = (socket: Socket) => {
+    socket.off("game_over", this.onGameOver);
+    socket.off("made_move", this.onMadeMove);
+    socket.off("game_begin", this.onGameBegin);
+    socket.off("field_winner", this.onFieldWinner);
+    socket.off("opponent_left", this.onOpponentLeft);
+    socket.off("rematch_accepted", this.onRematchAccepted);
+    socket.off("rematch_rejected", this.onRematchRejected);
+    socket.off("rematch_request", this.onRematchRequest);
+
+    socket.disconnect();
+
+    store.dispatch(reset());
+  };
+
   makeMove = (field: number, subField: number) => {
-    this.socket.emit("make_move", field, subField);
+    this.socket.emit("make_move_plus", field, subField);
   };
 
   acceptRematch = () => {

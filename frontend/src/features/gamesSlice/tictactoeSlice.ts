@@ -115,14 +115,16 @@ export const tictactoeSlice = createSlice({
           state.player!.symbol = state.player?.symbol === "X" ? "O" : "X";
 
           if (
-            state.player?.elo !== undefined &&
+            state.player?.elo &&
+            state.player.elo !== null &&
             state.player?.diffElo !== undefined
           ) {
             state.player.elo += state.player.diffElo;
           }
 
           if (
-            state.opponent?.elo !== undefined &&
+            state.opponent?.elo &&
+            state.opponent.elo !== null &&
             state.opponent?.diffElo !== undefined
           ) {
             state.opponent.elo += state.opponent.diffElo;

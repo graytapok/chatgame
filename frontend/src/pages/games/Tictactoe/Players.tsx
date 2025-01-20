@@ -66,12 +66,15 @@ const Players = ({ plus = false }: { plus?: boolean }) => {
   const { player, opponent } = useAppSelector((state) =>
     plus ? state.games.tictactoePlus : state.games.tictactoe
   );
+  const user = useAppSelector((state) => state.user);
   return (
     <Flex className="text-center justify-center m-4 gap-3">
       <Flex className="justify-center items-center gap-2">
         <DiffElo player={player} />
 
-        <Text>{player?.username ? player.username : "You"}</Text>
+        <Text>
+          {user.authenticated && player?.username ? player.username : "You"}
+        </Text>
 
         <Elo player={player} />
 

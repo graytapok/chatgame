@@ -9,6 +9,6 @@ class Player(BaseModel):
     room: str | None = None
     username: str
     user_id: UUID | None = None
-    opponent_id: str | None
+    opponent_id: str | None = None
     symbol: Literal["X", "O"] = "X"
     elo: int | None = None

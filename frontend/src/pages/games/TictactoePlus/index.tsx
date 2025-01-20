@@ -1,48 +1,26 @@
 import { Flex, Heading } from "@radix-ui/themes";
 import { useEffect } from "react";
 
-import { Chat } from "src/components";
-import { manager as socketManager } from "src/sockets";
-import { useAppDispatch, useAppSelector } from "src/hooks";
-import Players from "src/pages/games/Tictactoe/Players";
-import { TictactoePlusSocket } from "src/sockets";
-import Fields from "src/pages/games/TictactoePlus/Fields";
-import { reset } from "src/features/gamesSlice/tictactoePlusSlice";
-import Messages from "src/pages/games/TictactoePlus/Messages";
 import FinishButtons from "src/pages/games/Tictactoe/FinishButtons";
+import Messages from "src/pages/games/TictactoePlus/Messages";
+import Fields from "src/pages/games/TictactoePlus/Fields";
+import Players from "src/pages/games/Tictactoe/Players";
+import { manager as socketManager } from "src/sockets";
+import { TictactoePlusSocket } from "src/sockets";
+import { useAppSelector } from "src/hooks";
+import { Chat } from "src/components";
 
 const socket = socketManager.socket("/tictactoe_plus");
 const manager = new TictactoePlusSocket(socket);
 
 const TictactoePlus = () => {
   const tictactoePlus = useAppSelector((state) => state.games.tictactoePlus);
-  const dispatch = useAppDispatch();
 
   useEffect(() => {
-    socket.connect();
-
-    socket.on("game_over", manager.onGameOver);
-    socket.on("made_move", manager.onMadeMove);
-    socket.on("game_begin", manager.onGameBegin);
-    socket.on("field_winner", manager.onFieldWinner);
-    socket.on("opponent_left", manager.onOpponentLeft);
-    socket.on("rematch_accepted", manager.onRematchAccepted);
-    socket.on("rematch_rejected", manager.onRematchRejected);
-    socket.on("rematch_request", manager.onRematchRequest);
+    manager.connectSockets(socket);
 
     return () => {
-      socket.off("game_over", manager.onGameOver);
-      socket.off("made_move", manager.onMadeMove);
-      socket.off("game_begin", manager.onGameBegin);
-      socket.off("field_winner", manager.onFieldWinner);
-      socket.off("opponent_left", manager.onOpponentLeft);
-      socket.off("rematch_accepted", manager.onRematchAccepted);
-      socket.off("rematch_rejected", manager.onRematchRejected);
-      socket.off("rematch_request", manager.onRematchRequest);
-
-      socket.disconnect();
-
-      dispatch(reset());
+      manager.removeSockets(socket);
     };
   }, [tictactoePlus.nextGame]);
 

@@ -12,6 +12,7 @@ import {
   rematch,
   Winner,
   GameBeginProps,
+  reset,
 } from "src/features/gamesSlice/tictactoeSlice";
 import { addMessage } from "src/features/chatSlice";
 
@@ -27,6 +28,32 @@ export class TictactoeSocket {
   constructor(socket: Socket) {
     this.socket = socket;
   }
+
+  connectSockets = (socket: Socket) => {
+    socket.connect();
+
+    socket.on("game_over", this.onGameOver);
+    socket.on("made_move", this.onMadeMove);
+    socket.on("game_begin", this.onGameBegin);
+    socket.on("opponent_left", this.onOpponentLeft);
+    socket.on("rematch_accepted", this.onRematchAccepted);
+    socket.on("rematch_rejected", this.onRematchRejected);
+    socket.on("rematch_request", this.onRematchRequest);
+  };
+
+  removeSockets = (socket: Socket) => {
+    socket.off("game_over");
+    socket.off("made_move");
+    socket.off("game_begin");
+    socket.off("opponent_left");
+    socket.off("rematch_accepted");
+    socket.off("rematch_rejected");
+    socket.off("rematch_request");
+
+    socket.disconnect();
+
+    store.dispatch(reset());
+  };
 
   makeMove = (id: number) => {
     this.socket.emit("make_move", id);

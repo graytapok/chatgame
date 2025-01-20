@@ -10,20 +10,18 @@ class TictactoePlusManager(TictactoeManager):
         if sid not in self.players:
             return
 
-        player = self.get_player(sid)
-        player.symbol = "O"
-
-        self.players[self.unmatched_player_id].opponent_id = sid
         opponent = self.get_opponent(sid)
-
-        self.unmatched_player_id = None
+        player = self.get_player(sid)
 
         room = player.sid + opponent.sid
 
+        player.symbol = "O"
         player.room = room
         opponent.room = room
 
-        self.games.update({room: TictactoePlusGame(room=room)})
+        self.games.update({
+            room: TictactoePlusGame(room=room)
+        })
 
     def make_move_plus(self, sid: str, field: int, sub_field: int) -> dict | None:
         player = self.get_player(sid)
@@ -77,46 +75,3 @@ class TictactoePlusManager(TictactoeManager):
         return res
 
     def make_move(self, sid: str, move): return None
-
-    def rematch(self, sid: str, decision: bool):
-        player = self.get_player(sid)
-        opponent = self.get_opponent(sid)
-        game = self.get_game(sid)
-        room = self.get_room(sid)
-
-        if not player or not game:
-            return
-
-        if not game.rematch:
-            game.decide_rematch(sid, decision)
-
-            return "send request"
-
-        if player.sid not in game.rematch and opponent.sid in game.rematch:
-            game.decide_rematch(sid, decision)
-
-            if game.rematch[player.sid] and game.rematch[opponent.sid]:
-                ps = player.symbol
-                os = opponent.symbol
-
-                player.symbol = os
-                opponent.symbol = ps
-
-                game.setup_rematch()
-
-                return "accepted"
-
-            return "rejected"
-
-        return
-
-    def get_game(self, sid: str):
-        if sid not in self.players:
-            return
-
-        room = self.get_room(sid)
-
-        if room in self.games:
-            return self.games[room]
-
-        return None

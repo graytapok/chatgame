@@ -10,7 +10,7 @@ from ...constants import Game
 
 
 class TictactoeManager(BaseModel):
-    unmatched_player_id: str | None = None
+    unmatched_players: list[str] = []
     players: dict[str, Player] = {}
     games: dict[str, TictactoeGame] = {}
 
@@ -18,30 +18,50 @@ class TictactoeManager(BaseModel):
         if not username:
             username = f"Guest{randint(1000, 9999)}"
 
+        player = Player(sid=sid, username=username, user_id=user_id, elo=elo)
+
+        for up_sid in self.unmatched_players:
+            potential_opponent = self.players[up_sid]
+
+            if user_id is None and potential_opponent.user_id is None:    # both guests
+                potential_opponent.opponent_id = sid
+                player.opponent_id = up_sid
+
+                self.unmatched_players.remove(up_sid)
+
+                break
+
+            elif (
+                    user_id is not None                             # <- both authenticated
+                    and potential_opponent.user_id is not None      # <-
+                    and abs(elo - potential_opponent.elo) < 200     # valid elo difference
+            ):
+                potential_opponent.opponent_id = sid
+                player.opponent_id = up_sid
+
+                self.unmatched_players.remove(up_sid)
+
+                break
+
         self.players.update({
-            sid: Player(sid=sid, username=username, user_id=user_id, opponent_id=self.unmatched_player_id, elo=elo)
+            sid: player
         })
 
-        if self.unmatched_player_id is None:
-            self.unmatched_player_id = sid
+        if player.opponent_id is None:
+            self.unmatched_players.append(sid)
 
     def setup_game(self, sid: str):
         if sid not in self.players:
             return
-
-        self.players[sid].symbol = "O"
-
-        self.players[self.unmatched_player_id].opponent_id = sid
-
-        self.unmatched_player_id = None
 
         opponent = self.get_opponent(sid)
         player = self.get_player(sid)
 
         room = player.sid + opponent.sid
 
-        self.players[sid].room = room
-        self.players[opponent.sid].room = room
+        player.symbol = "O"
+        player.room = room
+        opponent.room = room
 
         self.games.update({
             room: TictactoeGame(room=room)
@@ -106,11 +126,18 @@ class TictactoeManager(BaseModel):
 
     def disconnect(self, sid: str):
         opponent = self.get_opponent(sid)
+        player = self.get_player(sid)
+        game = self.get_game(sid)
 
-        res = []
+        res = {}
+
+        if game:
+            if game.status != "finished":
+                diff_elo = self.game_over(player, opponent, game, Game.TICTACTOE, opponent.symbol)
+                res.update({"elo": diff_elo})
 
         if opponent:
-            res.append("emit")
+            res.update({"emit": ""})
 
         if sid in self.players:
             room = self.get_room(sid)
@@ -119,10 +146,9 @@ class TictactoeManager(BaseModel):
                 del self.games[room]
 
             del self.players[sid]
-            res.append("close")
+            res.update({"close": ""})
 
-        if self.unmatched_player_id == sid:
-            self.unmatched_player_id = None
+        if sid in self.unmatched_players: self.unmatched_players.remove(sid)
 
         return res
 
