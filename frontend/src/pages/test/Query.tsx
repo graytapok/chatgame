@@ -108,6 +108,9 @@ function TestQueryButtons() {
           </DataList.Item>
         </DataList.Root>
       )}
+      <Button color="gray" disabled={true}>
+        {"    "}
+      </Button>
     </>
   );
 }

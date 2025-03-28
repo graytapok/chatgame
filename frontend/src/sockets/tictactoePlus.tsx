@@ -17,40 +17,44 @@ import {
 import { addMessage } from "src/features/chatSlice";
 import { GameBeginProps } from "src/features/gamesSlice/tictactoeSlice";
 import { OnGameOverResponse } from "./tictactoe";
+import { useEffect } from "react";
+import { manager } from ".";
 
 export class TictactoePlusSocket {
   socket: Socket;
 
-  constructor(socket: Socket) {
-    this.socket = socket;
+  constructor() {
+    this.socket = manager.socket("/tictactoe_plus");
   }
 
-  connectSockets = (socket: Socket) => {
-    socket.connect();
+  useSockets = (trigger: any) => {
+    useEffect(() => {
+      this.socket.connect();
 
-    socket.on("made_move", this.onMadeMove);
-    socket.on("game_over", this.onGameOver);
-    socket.on("game_begin", this.onGameBegin);
-    socket.on("field_winner", this.onFieldWinner);
-    socket.on("opponent_left", this.onOpponentLeft);
-    socket.on("rematch_accepted", this.onRematchAccepted);
-    socket.on("rematch_rejected", this.onRematchRejected);
-    socket.on("rematch_request", this.onRematchRequest);
-  };
+      this.socket.on("made_move", this.onMadeMove);
+      this.socket.on("game_over", this.onGameOver);
+      this.socket.on("game_begin", this.onGameBegin);
+      this.socket.on("field_winner", this.onFieldWinner);
+      this.socket.on("opponent_left", this.onOpponentLeft);
+      this.socket.on("rematch_accepted", this.onRematchAccepted);
+      this.socket.on("rematch_rejected", this.onRematchRejected);
+      this.socket.on("rematch_request", this.onRematchRequest);
 
-  removeSockets = (socket: Socket) => {
-    socket.off("game_over", this.onGameOver);
-    socket.off("made_move", this.onMadeMove);
-    socket.off("game_begin", this.onGameBegin);
-    socket.off("field_winner", this.onFieldWinner);
-    socket.off("opponent_left", this.onOpponentLeft);
-    socket.off("rematch_accepted", this.onRematchAccepted);
-    socket.off("rematch_rejected", this.onRematchRejected);
-    socket.off("rematch_request", this.onRematchRequest);
+      return () => {
+        this.socket.off("game_over", this.onGameOver);
+        this.socket.off("made_move", this.onMadeMove);
+        this.socket.off("game_begin", this.onGameBegin);
+        this.socket.off("field_winner", this.onFieldWinner);
+        this.socket.off("opponent_left", this.onOpponentLeft);
+        this.socket.off("rematch_accepted", this.onRematchAccepted);
+        this.socket.off("rematch_rejected", this.onRematchRejected);
+        this.socket.off("rematch_request", this.onRematchRequest);
 
-    socket.disconnect();
+        this.socket.disconnect();
 
-    store.dispatch(reset());
+        store.dispatch(reset());
+      };
+    }, [trigger]);
   };
 
   makeMove = (field: number, subField: number) => {

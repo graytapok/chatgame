@@ -26,25 +26,7 @@ def get_user_statistics(user_id: str):
 @bp.get("/leaderboard")
 @validate()
 def get_leaderboard(query: LeaderboardQuery):
-    counter = query.p * query.per - query.per
-    leaderboard = StatisticsService.get_leaderboard(query.p, query.per)
-
-    if query.p > leaderboard.pages:
-        counter = leaderboard.pages * query.per - query.per
-        leaderboard = StatisticsService.get_leaderboard(leaderboard.pages, query.per)
-
-    if query.p < 1:
-        counter = 1 * query.per - query.per
-        leaderboard = StatisticsService.get_leaderboard(1, query.per)
-
-    top3 = StatisticsService.get_leaderboard_top_3()
-
-    users = []
-
-    for i in leaderboard.items:
-        counter += 1
-        i.rank = counter
-        users.append(LeaderboardUserDto.model_validate(i))
+    counter, leaderboard = StatisticsService.get_leaderboard(query.p, query.per)
 
     return LeaderboardDto(
         total=leaderboard.total,
@@ -52,33 +34,15 @@ def get_leaderboard(query: LeaderboardQuery):
         current_page=leaderboard.page,
         next_page=leaderboard.next_num,
         prev_page=leaderboard.prev_num,
-        users=users,
-        top3=[LeaderboardUserDto.model_validate(i) for i in top3]
+        users=leaderboard.items,
+        top3=[LeaderboardUserDto.model_validate(i) for i in leaderboard.items[:3]]
     )
 
 @bp.get("/leaderboard/friends")
 @login_required
 @validate()
 def get_friends_leaderboard(query: LeaderboardQuery):
-    counter = query.p * query.per - query.per
-    leaderboard = StatisticsService.get_friends_leaderboard(current_user, query.p, query.per)
-
-    if query.p > leaderboard.pages:
-        counter = leaderboard.pages * query.per - query.per
-        leaderboard = StatisticsService.get_friends_leaderboard(current_user, leaderboard.pages, query.per)
-
-    if query.p < 1:
-        counter = 1 * query.per - query.per
-        leaderboard = StatisticsService.get_friends_leaderboard(current_user, 1, query.per)
-
-    top3 = StatisticsService.get_friends_leaderboard_top_3(current_user)
-
-    users = []
-
-    for i in leaderboard.items:
-        counter += 1
-        i.rank = counter
-        users.append(LeaderboardUserDto.model_validate(i))
+    counter, leaderboard = StatisticsService.get_friends_leaderboard(current_user, query.p, query.per)
 
     return LeaderboardDto(
         total=leaderboard.total,
@@ -86,6 +50,6 @@ def get_friends_leaderboard(query: LeaderboardQuery):
         current_page=leaderboard.page,
         next_page=leaderboard.next_num,
         prev_page=leaderboard.prev_num,
-        users=users,
-        top3=[LeaderboardUserDto.model_validate(i) for i in top3]
+        users=leaderboard.items,
+        top3=[LeaderboardUserDto.model_validate(i) for i in leaderboard.items[:3]]
     )

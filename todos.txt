@@ -1,6 +1,0 @@
-- leaderboard
-- invite 
-  - via friends
-  - via link
-- global chat
-  - invites

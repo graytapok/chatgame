@@ -24,8 +24,8 @@ export interface Field extends SubField {
 type OmitedTictactoeState = Omit<Omit<TictactoeState, "fields">, "turn">;
 
 export interface TictactoePlusState extends OmitedTictactoeState {
-  turn: Turn;
-  fields: Field[];
+  turn?: Turn;
+  fields?: Field[];
 }
 
 export interface MadeMoveProps {
@@ -40,7 +40,9 @@ export interface FieldWinnerProps {
   symbol: Symbol;
 }
 
-const initialState: Partial<TictactoePlusState> = {};
+const initialState: TictactoePlusState = {
+  counter: 0,
+};
 
 export const tictactoePlusSlice = createSlice({
   name: "tictactoePlus",
@@ -64,8 +66,6 @@ export const tictactoePlusSlice = createSlice({
       }
     },
     gameOver: (state, { payload: p }: PayloadAction<GameOverProps>) => {
-      console.log(p);
-
       state.turn = undefined;
       state.status = "finished";
       state.winner = p.winner;
@@ -155,11 +155,7 @@ export const tictactoePlusSlice = createSlice({
       }
     },
     nextGame: (state) => {
-      if (state.nextGame) {
-        state.nextGame += 1;
-      } else {
-        state.nextGame = 1;
-      }
+      state.counter += 1;
       state = initialState;
     },
     reset: () => initialState,
@@ -175,6 +171,6 @@ export const {
   madeMove,
   opponentLeft,
   rematch,
-  nextGame,
   reset,
+  nextGame,
 } = tictactoePlusSlice.actions;

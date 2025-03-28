@@ -22,15 +22,16 @@ export type Winner = "draw" | "X" | "O";
 export type Symbol = "X" | "O";
 
 export interface TictactoeState {
-  opponent: Player;
-  player: Player;
+  opponent?: Player;
+  player?: Player;
 
-  status: Status;
-  turn: Symbol;
-  fields: Field[];
-  winner: Winner;
-  rematch: Rematch;
-  nextGame: number;
+  status?: Status;
+  turn?: Symbol;
+  fields?: Field[];
+  winner?: Winner;
+  rematch?: Rematch;
+
+  counter: number;
 }
 
 export interface GameBeginProps {
@@ -54,7 +55,9 @@ export interface GameOverProps {
   diffOElo?: number;
 }
 
-const initialState: Partial<TictactoeState> = {};
+const initialState: TictactoeState = {
+  counter: 0,
+};
 
 export const tictactoeSlice = createSlice({
   name: "tictactoe",
@@ -149,11 +152,7 @@ export const tictactoeSlice = createSlice({
       }
     },
     nextGame: (state) => {
-      if (state.nextGame) {
-        state.nextGame += 1;
-      } else {
-        state.nextGame = 1;
-      }
+      state.counter += 1;
       state = initialState;
     },
     reset: () => initialState,
@@ -168,6 +167,6 @@ export const {
   madeMove,
   opponentLeft,
   reset,
-  nextGame,
   rematch,
+  nextGame,
 } = tictactoeSlice.actions;

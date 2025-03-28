@@ -13,17 +13,17 @@ export const Podium = () => {
     <div className="flex justify-center items-end text-4xl m-20 mt-32">
       <div className={style + "h-[180px] rounded-l-lg"}>
         <span>2</span>
-        <Top3 user={data?.users?.at(1)} />
+        <Top3 user={data?.top3?.at(1)} />
       </div>
 
       <div className={style + "h-[280px] rounded-t-lg"}>
         <span className="mb-32">1</span>
-        <Top3 user={data?.users?.at(0)} />
+        <Top3 user={data?.top3?.at(0)} />
       </div>
 
       <div className={style + "h-[140px] rounded-r-lg"}>
         <span>3</span>
-        <Top3 user={data?.users?.at(2)} />
+        <Top3 user={data?.top3?.at(2)} />
       </div>
     </div>
   );

@@ -9,7 +9,6 @@ function Footer() {
         className="mx-5 h-16 m-0 max-w-screen-xl items-center justify-between w-full"
       >
         <Heading size="6">Footer</Heading>
-        Coming soon...
       </Flex>
     </Flex>
   );

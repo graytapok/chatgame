@@ -4,8 +4,8 @@ import { toast } from "react-toastify";
 import { apiClient } from "src/hooks/api";
 
 const getLogout = async () => {
-  const response = await apiClient.get("/auth/logout");
-  return response.data;
+  await apiClient.get("/auth/logout");
+  return {};
 };
 
 export const useLogout = () => {

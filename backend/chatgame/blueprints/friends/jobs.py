@@ -15,4 +15,4 @@ def delete_expired_friend_requests():
         db.session.execute(stmt)
         db.session.commit()
 
-        scheduler.app.logger.info("Expired or answered FriendRequests deleted.")
+        scheduler.app.logger.info("Expired FriendRequests deleted.")

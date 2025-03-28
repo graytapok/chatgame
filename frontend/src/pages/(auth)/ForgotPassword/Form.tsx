@@ -68,7 +68,7 @@ function ForgotPassword() {
           <Callout.Icon>
             <InfoCircledIcon />
           </Callout.Icon>
-          <Callout.Text>Password change email sended!</Callout.Text>
+          <Callout.Text>Password change email has been sent!</Callout.Text>
         </Callout.Root>
       )}
 

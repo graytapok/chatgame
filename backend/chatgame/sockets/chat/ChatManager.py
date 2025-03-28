@@ -24,6 +24,7 @@ class ChatManager:
     def get_user(self, sid) -> SocketUser | None:
         if sid in self.users:
             return self.users[sid]
+
         return
 
     def get_room(self, sid) -> Room | None:

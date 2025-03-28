@@ -5,8 +5,9 @@ from random import randint
 from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy import or_
 
+from chatgame.blueprints.statistics.dto import LeaderboardQuery
 from chatgame.blueprints.users import UsersService
-from chatgame.db.models.UserModel import friend_table
+from chatgame.db.models import FriendModel
 from chatgame.exceptions import AlreadyExistsException, NotFoundException
 from chatgame.db.models import TotalStatisticsModel, SubStatisticsModel, UserModel
 from chatgame.constants import Game
@@ -90,33 +91,8 @@ class StatisticsService:
         return StatisticsService.create_sub_statistics(sub_statistics_name, total_statistics.id)
 
     @staticmethod
-    def get_leaderboard_top_3() -> list[UserModel]:
-        return (
-            db.session
-            .query(UserModel)
-            .join(TotalStatisticsModel, TotalStatisticsModel.user_id == UserModel.id)
-            .filter(TotalStatisticsModel.total_games >= 10)
-            .order_by(TotalStatisticsModel.total_elo.desc(), TotalStatisticsModel.total_wins.desc())
-            .limit(3)
-            .all()
-        )
-
-    @staticmethod
-    def get_friends_leaderboard_top_3(user: UserModel) -> list[UserModel]:
-        return (
-            db.session
-            .query(UserModel)
-            .join(friend_table, friend_table.c.friend_id == UserModel.id)
-            .where(or_(friend_table.c.user_id == user.id, UserModel.id == user.id))
-            .join(TotalStatisticsModel, TotalStatisticsModel.user_id == UserModel.id)
-            .order_by(TotalStatisticsModel.total_elo.desc(), TotalStatisticsModel.total_wins.desc())
-            .limit(3)
-            .all()
-        )
-
-    @staticmethod
-    def get_leaderboard(page: int, per_page: int) -> Pagination:
-        best_stats: Pagination = (
+    def get_leaderboard(page: int, per_page: int) -> tuple[int, Pagination]:
+        leaderboard: Pagination = (
             db.session
             .query(UserModel)
             .join(TotalStatisticsModel, TotalStatisticsModel.user_id == UserModel.id)
@@ -125,55 +101,109 @@ class StatisticsService:
             .paginate(page=page, per_page=per_page, error_out=False)
         )
 
-        return best_stats
+        if 0 < page <= leaderboard.pages:
+            counter = page * per_page - per_page
+
+            users = []
+
+            for i in leaderboard.items:
+                counter += 1
+                i.rank = counter
+                users.append(i)
+
+            leaderboard.items = users
+
+            return counter, leaderboard
+
+        if page > leaderboard.pages:
+            return StatisticsService.get_leaderboard(leaderboard.pages, per_page)
+
+        return StatisticsService.get_leaderboard(1, per_page)
 
     @staticmethod
-    def get_friends_leaderboard(user: UserModel, page: int, per_page: int) -> Pagination:
-        best_stats: Pagination = (
+    def get_friends_leaderboard(user: UserModel, page: int, per_page: int) -> tuple[int, Pagination]:
+        leaderboard: Pagination = (
             db.session
             .query(UserModel)
-            .join(friend_table, friend_table.c.friend_id == UserModel.id)
-            .where(or_(friend_table.c.user_id == user.id, UserModel.id == user.id))
+            .join(FriendModel, or_(FriendModel.friend_id == UserModel.id, UserModel.id == user.id))
+            .where(or_(FriendModel.user_id == user.id, UserModel.id == user.id))
             .join(TotalStatisticsModel, TotalStatisticsModel.user_id == UserModel.id)
             .order_by(TotalStatisticsModel.total_elo.desc(), TotalStatisticsModel.total_wins.desc())
             .paginate(page=page, per_page=per_page, error_out=False)
         )
 
-        return best_stats
+        if 0 < page <= leaderboard.pages:
+            counter = page * per_page - per_page
+
+            users = []
+
+            for i in leaderboard.items:
+                counter += 1
+                i.rank = counter
+                users.append(i)
+
+            leaderboard.items = users
+
+            return counter, leaderboard
+
+        if page > leaderboard.pages:
+            return StatisticsService.get_friends_leaderboard(user, leaderboard.pages, per_page)
+
+        return StatisticsService.get_friends_leaderboard(user, 1, per_page)
 
     @staticmethod
-    def generate_elo():
-        percent = randint(1, 100)
+    def calculate_elo(w_elo: int, l_elo: int):
+        elo_diff = w_elo - l_elo
+        elo_bonus = abs(elo_diff) // 22
 
-        if 1 <= percent <= 70:
-            return randint(10, 15)  # 70% 10-15
-        elif 71 < percent <= 90:
-            return randint(16, 20)  # 20% 16-20
-        else:
-            return randint(21, 25)  # 10% 21-25
+        w_diff = randint(14, 18)
+        l_diff = -randint(14, 18)
+
+        if elo_diff > 0:
+            w_diff -= elo_bonus
+            l_diff += elo_bonus
+        elif elo_diff < 0:
+            w_diff += elo_bonus
+            l_diff -= elo_bonus
+
+        return w_diff, l_diff
 
     @staticmethod
-    def register_played_game(user_id: UUID, game: Game, outcome: Literal["win", "loss", "draw"]) -> int | None:
-        sub_statistics = StatisticsService.get_user_sub_statistics(user_id, game)
+    def register_played_game(user_id: UUID, opponent_id: UUID, game: Game, outcome: Literal["win", "loss", "draw"]):
+        player = StatisticsService.get_user_sub_statistics(user_id, game)
+        opponent = StatisticsService.get_user_sub_statistics(opponent_id, game)
 
-        sub_statistics.games += 1
-
-        elo = StatisticsService.generate_elo()
+        player.games += 1
+        opponent.games += 1
 
         if outcome == "win":
-            sub_statistics.wins += 1
-            sub_statistics.elo += elo
+            player.wins += 1
+            opponent.losses += 1
+
+            player_diff, opponent_diff = StatisticsService.calculate_elo(player.elo, opponent.elo)
+
+            player.elo += player_diff
+            opponent.elo = opponent.elo - opponent_diff if opponent.elo > opponent_diff else 0
 
             db.session.commit()
-            return elo
+
+            return {"player_elo": player_diff, "opponent_elo": opponent_diff}
 
         if outcome == "loss":
-            sub_statistics.losses += 1
-            sub_statistics.elo = sub_statistics.elo - elo if sub_statistics.elo > elo else 0
+            opponent.wins += 1
+            player.losses += 1
+
+            opponent_diff, player_diff = StatisticsService.calculate_elo(opponent.elo, player.elo)
+
+            opponent.elo += opponent_diff
+            player.elo = player.elo - player_diff if player.elo > player_diff else 0
 
             db.session.commit()
-            return -elo
 
-        sub_statistics.draws += 1
+            return {"player_elo": player_diff, "opponent_elo": opponent_diff}
+
+        player.draws += 1
+        opponent.draws += 1
         db.session.commit()
-        return 0
+
+        return {"player_elo": 0, "opponent_elo": 0}

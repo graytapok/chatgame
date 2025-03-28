@@ -4,15 +4,15 @@ from typing import Literal
 import click
 from flask import current_app
 
-from ..statistics import StatisticsService, bp
-
+from chatgame.exceptions import ApiException
 from chatgame.constants import Game
+from ..statistics import StatisticsService, bp
 from ..users import UsersService
 
 
 @bp.cli.command("create-total-statistics")
 @click.argument("user_id")
-def create_total_statistics_command(user_id):
+def create_total_statistics(user_id):
     StatisticsService.create_total_statistics(user_id)
 
     current_app.logger.info(f"TotalStatistics for User <{user_id}> created")
@@ -20,7 +20,7 @@ def create_total_statistics_command(user_id):
 @bp.cli.command("create-sub-statistics")
 @click.argument("game_name")
 @click.argument("total_statistics_id")
-def create_total_statistics_command(game_name: str, total_statistics_id: int):
+def create_total_statistics(game_name: str, total_statistics_id: int):
     StatisticsService.create_sub_statistics(Game(game_name), total_statistics_id)
 
     current_app.logger.info(f"SubStatistics for <TotalStatistics {total_statistics_id}> created")
@@ -28,8 +28,34 @@ def create_total_statistics_command(game_name: str, total_statistics_id: int):
 @bp.cli.command("create-many-users")
 @click.argument("amount")
 def create_many_users(amount: int):
-    for i in range(1, int(amount) + 1):
-        user = UsersService.create_user(f"User{i}", f"user{i}@gmail.com", "password", email_confirmed=True)
+    counter: int = 1
+    for _ in range(1, int(amount) // 2 + 1):
+        user = None
+        opponent = None
+
+        while user is None:
+            try:
+                user = UsersService.create_user(
+                    f"User{counter}",
+                    f"user{counter}@gmail.com",
+                    "password",
+                    email_confirmed=True
+                )
+            except ApiException:
+                counter += 1
+                continue
+
+        while opponent is None:
+            try:
+                opponent = UsersService.create_user(
+                    f"User{counter}",
+                    f"user{counter}@gmail.com",
+                    "password",
+                    email_confirmed=True
+                )
+            except ApiException:
+                counter += 1
+                continue
 
         for j in range(0, randint(20, 100)):
             game = Game.TICTACTOE if randint(0, 1) else Game.TICTACTOE_PLUS
@@ -43,9 +69,17 @@ def create_many_users(amount: int):
             elif 51 <= percent <= 70:
                 outcome = "draw"    # 20%
             else:
-                outcome = "loss"    # 30%
+                outcome = "loss"
 
-            StatisticsService.register_played_game(user.id, game, outcome)
+            StatisticsService.register_played_game(user.id, opponent.id, game, outcome)   # type: ignore
 
     current_app.logger.info(f"{amount} users have been created.")
 
+
+@bp.cli.command("clear-users")
+def clear_many_users():
+    for i in UsersService.get_all_users():
+        if "User" in i.username:
+            UsersService.delete_user(user=i)
+
+    current_app.logger.info(f"Users have been cleared.")

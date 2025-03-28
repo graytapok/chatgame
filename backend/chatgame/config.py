@@ -8,7 +8,7 @@ class Config(BaseSettings):
     ENV: Environments = "dev"
 
     # Flask
-    APP: str = Field(alias="FLASK_APP")
+    APP: str = Field(alias="FLASK_APP", default="chatgame")
     DEBUG: bool = Field(True if ENV != "prod" else False, alias="FLASK_DEBUG")
     TESTING: bool = True if ENV == "test" else False
     SECRET_KEY: str

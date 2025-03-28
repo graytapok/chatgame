@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, Literal
 from uuid import UUID
 
@@ -120,3 +121,35 @@ class UsersService:
         except EmailNotValidError:
             user = db.session.query(UserModel).filter_by(username=login).first()
         return user
+
+    @staticmethod
+    def delete_user(user: UserModel = None, username: str = None, user_id: UUID | str = None):
+        if user:
+            db.session.delete(user)
+            db.session.commit()
+            return
+
+        if user_id:
+            user = UsersService.get_user_or_throw(user_id)
+            db.session.delete(user)
+            db.session.commit()
+            return
+
+        if username:
+            user = UsersService.get_user_by_username_or_throw(username)
+            db.session.delete(user)
+            db.session.commit()
+            return
+
+    @staticmethod
+    def set_online(username: str, online: bool = True):
+        user = UsersService.get_user_by_username_or_throw(username)
+
+        user.online = online
+
+        if online is False:
+            user.last_seen = datetime.now()
+        else:
+            user.last_seen = None
+
+        db.session.commit()

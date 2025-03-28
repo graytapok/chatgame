@@ -1,28 +1,18 @@
 import { Flex, Heading } from "@radix-ui/themes";
-import { useEffect } from "react";
 
 import FinishButtons from "src/pages/games/Tictactoe/FinishButtons";
 import Messages from "src/pages/games/TictactoePlus/Messages";
 import Fields from "src/pages/games/TictactoePlus/Fields";
 import Players from "src/pages/games/Tictactoe/Players";
-import { manager as socketManager } from "src/sockets";
 import { TictactoePlusSocket } from "src/sockets";
 import { useAppSelector } from "src/hooks";
 import { Chat } from "src/components";
 
-const socket = socketManager.socket("/tictactoe_plus");
-const manager = new TictactoePlusSocket(socket);
-
 const TictactoePlus = () => {
   const tictactoePlus = useAppSelector((state) => state.games.tictactoePlus);
+  const socketManager = new TictactoePlusSocket();
 
-  useEffect(() => {
-    manager.connectSockets(socket);
-
-    return () => {
-      manager.removeSockets(socket);
-    };
-  }, [tictactoePlus.nextGame]);
+  socketManager.useSockets(tictactoePlus.counter);
 
   return (
     <>
@@ -33,9 +23,9 @@ const TictactoePlus = () => {
       <Players plus />
 
       <Flex justify="center" gap="6" className="h-[550px]">
-        <Fields makeMove={manager.makeMove} />
+        <Fields makeMove={socketManager.makeMove} />
         <Chat
-          socket={socket}
+          socket={socketManager.socket}
           loading={
             tictactoePlus.status === "searching" ||
             tictactoePlus.status === undefined
@@ -46,7 +36,7 @@ const TictactoePlus = () => {
 
       <Messages />
 
-      <FinishButtons plus requestRematch={manager.requestRematch} />
+      <FinishButtons plus requestRematch={socketManager.requestRematch} />
     </>
   );
 };

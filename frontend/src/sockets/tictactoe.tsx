@@ -15,6 +15,8 @@ import {
   reset,
 } from "src/features/gamesSlice/tictactoeSlice";
 import { addMessage } from "src/features/chatSlice";
+import { useEffect } from "react";
+import { manager } from ".";
 
 export interface OnGameOverResponse {
   winner: Winner;
@@ -25,34 +27,36 @@ export interface OnGameOverResponse {
 export class TictactoeSocket {
   socket: Socket;
 
-  constructor(socket: Socket) {
-    this.socket = socket;
+  constructor() {
+    this.socket = manager.socket("/tictactoe");
   }
 
-  connectSockets = (socket: Socket) => {
-    socket.connect();
+  useSockets = (trigger: any) => {
+    useEffect(() => {
+      this.socket.connect();
 
-    socket.on("game_over", this.onGameOver);
-    socket.on("made_move", this.onMadeMove);
-    socket.on("game_begin", this.onGameBegin);
-    socket.on("opponent_left", this.onOpponentLeft);
-    socket.on("rematch_accepted", this.onRematchAccepted);
-    socket.on("rematch_rejected", this.onRematchRejected);
-    socket.on("rematch_request", this.onRematchRequest);
-  };
+      this.socket.on("game_over", this.onGameOver);
+      this.socket.on("made_move", this.onMadeMove);
+      this.socket.on("game_begin", this.onGameBegin);
+      this.socket.on("opponent_left", this.onOpponentLeft);
+      this.socket.on("rematch_accepted", this.onRematchAccepted);
+      this.socket.on("rematch_rejected", this.onRematchRejected);
+      this.socket.on("rematch_request", this.onRematchRequest);
 
-  removeSockets = (socket: Socket) => {
-    socket.off("game_over");
-    socket.off("made_move");
-    socket.off("game_begin");
-    socket.off("opponent_left");
-    socket.off("rematch_accepted");
-    socket.off("rematch_rejected");
-    socket.off("rematch_request");
+      return () => {
+        this.socket.off("game_over");
+        this.socket.off("made_move");
+        this.socket.off("game_begin");
+        this.socket.off("opponent_left");
+        this.socket.off("rematch_accepted");
+        this.socket.off("rematch_rejected");
+        this.socket.off("rematch_request");
 
-    socket.disconnect();
+        this.socket.disconnect();
 
-    store.dispatch(reset());
+        store.dispatch(reset());
+      };
+    }, [trigger]);
   };
 
   makeMove = (id: number) => {

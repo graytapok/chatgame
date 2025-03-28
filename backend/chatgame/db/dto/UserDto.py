@@ -8,7 +8,6 @@ class UserDto(BaseModel):
     username: str
     email: EmailStr
     admin: bool
-    email_confirmed: bool
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

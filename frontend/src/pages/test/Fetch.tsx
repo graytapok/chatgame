@@ -1,6 +1,6 @@
 import { ClipLoader } from "react-spinners";
 import { useState, useRef } from "react";
-import { User } from "src/types/auth";
+import { User } from "src/hooks/api/auth";
 
 function Buttons() {
   const [loading, setLoading] = useState<boolean>(false);

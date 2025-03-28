@@ -34,6 +34,7 @@ class TictactoeManager(BaseModel):
             elif (
                     user_id is not None                             # <- both authenticated
                     and potential_opponent.user_id is not None      # <-
+                    and potential_opponent.user_id != user_id       # not the same player
                     and abs(elo - potential_opponent.elo) < 200     # valid elo difference
             ):
                 potential_opponent.opponent_id = sid
@@ -88,7 +89,9 @@ class TictactoeManager(BaseModel):
 
         game.fields[move] = player.symbol
 
-        if winner := game.check_winner():
+        winner = game.check_winner()
+
+        if winner:
             return self.game_over(player, opponent, game, Game.TICTACTOE, winner)
 
         return {"success": True}
@@ -144,43 +147,38 @@ class TictactoeManager(BaseModel):
 
             if room in self.games:
                 del self.games[room]
+                res.update({"close": ""})
 
             del self.players[sid]
-            res.update({"close": ""})
 
         if sid in self.unmatched_players: self.unmatched_players.remove(sid)
 
         return res
 
-    def game_over(self, player: Player, opponent: Player, game, game_name: Game, winner: Literal["X", "O", "draw"]):
+    @staticmethod
+    def game_over(player: Player, opponent: Player, game, game_name: Game, winner: Literal["X", "O", "draw"]):
         game.status = "finished"
 
-        player_outcome: Literal["win", "loss", "draw"] = "draw"
-        opponent_outcome: Literal["win", "loss", "draw"] = "draw"
-
         if player.symbol == winner:
-            player_outcome = "win"
-            opponent_outcome = "loss"
+            outcome = "win"
         elif opponent.symbol == winner:
-            player_outcome = "loss"
-            opponent_outcome = "win"
+            outcome = "loss"
+        else:
+            outcome = "draw"
 
         player_elo = None
         opponent_elo = None
 
-        if player.user_id:
-            player_elo = StatisticsService.register_played_game(player.user_id, game_name, player_outcome)
+        if player.user_id and opponent.user_id:
+            elos = StatisticsService.register_played_game(player.user_id, opponent.user_id, game_name, outcome)  # type: ignore
 
-        if opponent.user_id:
-            opponent_elo = StatisticsService.register_played_game(opponent.user_id, game_name, opponent_outcome)
-
-        X_elo = player_elo if player.symbol == "X" else opponent_elo
-        O_elo = player_elo if player.symbol == "O" else opponent_elo
+            player_elo = elos["player_elo"]
+            opponent_elo = elos["opponent_elo"]
 
         return {
             "winner": winner,
-            "X_elo": X_elo,
-            "O_elo": O_elo
+            f"{player.symbol}_elo": player_elo,
+            f"{opponent.symbol}_elo": opponent_elo
         }
 
     def get_opponent(self, sid: str):

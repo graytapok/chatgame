@@ -14,7 +14,7 @@ class FriendRequestModel(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    status: Mapped[FriendRequestStatus] = mapped_column(Enum(FriendRequestStatus), default=FriendRequestStatus.IDLE, nullable=False)
+    status: Mapped[FriendRequestStatus] = mapped_column(Enum(FriendRequestStatus), default=FriendRequestStatus.PENDING, nullable=False)
 
     sender_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"), nullable=False)
     sender: Mapped["UserModel"] = relationship(back_populates="sent_friend_requests", foreign_keys=[sender_id])

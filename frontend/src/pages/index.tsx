@@ -1,9 +1,10 @@
 import { Route, Routes } from "react-router";
 
-import { AppLayout } from "src/components";
+import { AppLayout, ProtectedRoute } from "src/components";
 
 import Home from "./Home";
 import About from "./About";
+import Friends from "./Friends";
 import GameRoutes from "./games";
 import TestRoutes from "./test";
 import AuthRoutes from "./(auth)";
@@ -16,6 +17,10 @@ const AppRoutes = () => (
     <Route element={<AppLayout />}>
       <Route index element={<Home />} />
       <Route path="/about" element={<About />} />
+      <Route
+        path="/friends"
+        element={<ProtectedRoute element={<Friends />} />}
+      />
 
       <Route path="/test/*" element={<TestRoutes />} />
       <Route path="/game/*" element={<GameRoutes />} />

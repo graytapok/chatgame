@@ -13,6 +13,6 @@ export function useFriendsLeaderboard({ page, perPage }: UseLeaderboardParams) {
       });
       return data as LeaderboardData;
     },
-    queryKey: ["statistics", "leaderboard", page, perPage],
+    queryKey: ["statistics", "friends", "leaderboard", page, perPage],
   });
 }

@@ -1,7 +1,7 @@
 import { Navigate } from "react-router";
 import { PropsWithChildren } from "react";
 
-import { useAppSelector } from "src/hooks";
+import { useAuth } from "src/hooks/api/auth";
 
 interface ProtectedRouteProps extends PropsWithChildren {
   loginRequired?: boolean;
@@ -15,19 +15,23 @@ export const ProtectedRoute = ({
   element,
   children,
 }: ProtectedRouteProps) => {
-  const user = useAppSelector((state) => state.user);
+  const { data, status } = useAuth();
 
-  if (adminRequired && !user.admin) {
-    return <Navigate to="/" />;
-  }
-
-  if (loginRequired && !user.authenticated) {
-    return <Navigate to="/" />;
-  }
-
-  if (!loginRequired && user.authenticated) {
-    return <Navigate to="/" />;
-  }
-
-  return element ? element : children;
+  return (
+    <>
+      {status === "pending" ? (
+        <></>
+      ) : loginRequired && status === "error" ? (
+        <Navigate to="/" />
+      ) : adminRequired && status === "success" && !data?.admin ? (
+        <Navigate to="/" />
+      ) : !loginRequired && status === "success" ? (
+        <Navigate to="/" />
+      ) : element ? (
+        element
+      ) : (
+        children
+      )}
+    </>
+  );
 };

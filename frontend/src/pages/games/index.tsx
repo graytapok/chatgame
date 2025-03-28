@@ -7,11 +7,9 @@ import TictactoePlus from "./TictactoePlus";
 function GameRoutes() {
   return (
     <Routes>
-      <Route>
-        <Route index element={<GameHome />} />
-        <Route path="/tictactoe" element={<Tictactoe />} />
-        <Route path="/tictactoe_plus" element={<TictactoePlus />} />
-      </Route>
+      <Route index element={<GameHome />} />
+      <Route path="/tictactoe" element={<Tictactoe />} />
+      <Route path="/tictactoe_plus" element={<TictactoePlus />} />
     </Routes>
   );
 }

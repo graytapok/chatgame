@@ -2,13 +2,17 @@ import { Card, Spinner } from "@radix-ui/themes";
 import { createContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 
-import { LeaderboardData, useLeaderboard } from "src/hooks/api/statistics";
+import {
+  LeaderboardData,
+  useFriendsLeaderboard,
+  useLeaderboard,
+} from "src/hooks/api/statistics";
 import { Navigator } from "./Navigator";
 import { Podium } from "./Podium";
 import { UsersTable } from "./UsersTable";
 
 interface LeaderboardPorps {
-  queryHook: typeof useLeaderboard;
+  queryHook: typeof useLeaderboard | typeof useFriendsLeaderboard;
 }
 
 interface LeaderboardContext {

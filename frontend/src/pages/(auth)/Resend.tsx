@@ -69,7 +69,7 @@ function Resend() {
           <Callout.Icon>
             <InfoCircledIcon />
           </Callout.Icon>
-          <Callout.Text>New confirmation email sended!</Callout.Text>
+          <Callout.Text>New confirmation email has been sent!</Callout.Text>
         </Callout.Root>
       )}
 

@@ -1,5 +1,4 @@
 from flask_login import UserMixin
-from sqlalchemy import Table, Column, ForeignKey
 from sqlalchemy.exc import DataError
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -7,16 +6,10 @@ from uuid import UUID, uuid4
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from chatgame.db import Base
+from chatgame.db.models.FriendModel import friend_table
 from chatgame.extensions import db, login
-from chatgame.db.models import TotalStatisticsModel, FriendRequestModel
+from chatgame.db.models import TotalStatisticsModel, FriendRequestModel, FriendModel
 
-friend_table = Table(
-    "friend",
-    Base.metadata,
-    Column("user_id", ForeignKey("user.id"), primary_key=True),
-    Column("friend_id", ForeignKey("user.id"), primary_key=True)
-)
 
 class UserModel(UserMixin, db.Model):
     __tablename__ = "user"
@@ -25,6 +18,9 @@ class UserModel(UserMixin, db.Model):
     username: Mapped[str] = mapped_column(unique=True, nullable=False)
     email: Mapped[str] = mapped_column(nullable=False, unique=True)
     password_hash: Mapped[str]
+
+    online: Mapped[bool] = mapped_column(default=False, nullable=True)
+    last_seen: Mapped[datetime] = mapped_column(default=datetime.now(), nullable=True)
 
     admin: Mapped[bool] = mapped_column(default=False)
     email_confirmed: Mapped[bool] = mapped_column(default=False)

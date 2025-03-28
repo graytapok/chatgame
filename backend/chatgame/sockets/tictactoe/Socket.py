@@ -3,6 +3,7 @@ from flask_login import current_user
 from flask_socketio import join_room, emit, close_room, Namespace
 
 from .TictactoeManager import TictactoeManager
+from ..chat.Socket import manager
 from ...blueprints.statistics import StatisticsService
 from ...constants import Game
 

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Navigate, useNavigate } from "react-router";
+import { PageHeading } from "src/components";
 
 import { useLogout } from "src/hooks/api/auth";
 
@@ -16,7 +17,15 @@ function Logout() {
     }
   }, [query.status]);
 
-  return <>{query.isSuccess ? <Navigate to="/" /> : "Loading..."}</>;
+  return (
+    <>
+      {query.isSuccess ? (
+        <Navigate to="/" />
+      ) : (
+        <PageHeading title="Logout" text="Logging out!" />
+      )}
+    </>
+  );
 }
 
 export default Logout;
