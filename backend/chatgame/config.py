@@ -4,6 +4,7 @@ from typing import Literal
 
 Environments = Literal["dev", "prod", "test"]
 
+
 class Config(BaseSettings):
     ENV: Environments = "dev"
 
@@ -50,5 +51,6 @@ class Config(BaseSettings):
     MAIL_USE_SSL: bool = True
 
     model_config = SettingsConfigDict(env_file=".env")
+
 
 config = Config()
