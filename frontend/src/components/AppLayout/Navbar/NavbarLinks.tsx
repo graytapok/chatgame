@@ -33,6 +33,9 @@ function NavbarLinks() {
         <NavbarLink location="/leaderboard" text="Leaderboard" />
       </li>
       <li>
+        <NavbarLink location="/store" text="Store" />
+      </li>
+      <li>
         <NavbarLink location="/about" text="About" />
       </li>
       {user.admin && (

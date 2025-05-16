@@ -91,7 +91,7 @@ class StatisticsService:
         return StatisticsService.create_sub_statistics(sub_statistics_name, total_statistics.id)
 
     @staticmethod
-    def get_leaderboard(page: int, per_page: int) -> tuple[int, Pagination]:
+    def get_leaderboard(page: int, per_page: int) -> Pagination:
         leaderboard: Pagination = (
             db.session
             .query(UserModel)
@@ -113,7 +113,7 @@ class StatisticsService:
 
             leaderboard.items = users
 
-            return counter, leaderboard
+            return leaderboard
 
         if page > leaderboard.pages:
             return StatisticsService.get_leaderboard(leaderboard.pages, per_page)
@@ -121,7 +121,19 @@ class StatisticsService:
         return StatisticsService.get_leaderboard(1, per_page)
 
     @staticmethod
-    def get_friends_leaderboard(user: UserModel, page: int, per_page: int) -> tuple[int, Pagination]:
+    def get_leaderboard_top_3() -> list[UserModel]:
+        return (
+            db.session
+            .query(UserModel)
+            .join(TotalStatisticsModel, TotalStatisticsModel.user_id == UserModel.id)
+            .filter(TotalStatisticsModel.total_games >= 10)
+            .order_by(TotalStatisticsModel.total_elo.desc(), TotalStatisticsModel.total_wins.desc())
+            .limit(3)
+            .all()
+        )
+
+    @staticmethod
+    def get_friends_leaderboard(user: UserModel, page: int, per_page: int) -> Pagination:
         leaderboard: Pagination = (
             db.session
             .query(UserModel)
@@ -144,12 +156,33 @@ class StatisticsService:
 
             leaderboard.items = users
 
-            return counter, leaderboard
+            return leaderboard
+
+        elif leaderboard.pages == 0:
+            return leaderboard
 
         if page > leaderboard.pages:
             return StatisticsService.get_friends_leaderboard(user, leaderboard.pages, per_page)
 
         return StatisticsService.get_friends_leaderboard(user, 1, per_page)
+
+    @staticmethod
+    def get_friends_leaderboard_top_3(user: UserModel) -> list[UserModel]:
+        users = (
+            UserModel
+            .query
+            .join(FriendModel, or_(FriendModel.friend_id == UserModel.id, UserModel.id == user.id))
+            .where(or_(FriendModel.user_id == user.id, UserModel.id == user.id))
+            .join(TotalStatisticsModel, TotalStatisticsModel.user_id == UserModel.id)
+            .order_by(TotalStatisticsModel.total_elo.desc(), TotalStatisticsModel.total_wins.desc())
+            .all()
+        )[:3]
+
+        if not users and not user.statistics:
+            StatisticsService.create_total_statistics(str(user.id))
+            return [user]
+
+        return users
 
     @staticmethod
     def calculate_elo(w_elo: int, l_elo: int):

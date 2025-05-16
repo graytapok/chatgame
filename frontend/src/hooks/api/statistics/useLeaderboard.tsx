@@ -16,7 +16,7 @@ export interface LeaderboardUser {
   username: string;
   email: string;
   admin: boolean;
-  created_at: string;
+  createdAt: string;
   rank?: number;
   statistics: Statistics;
 }

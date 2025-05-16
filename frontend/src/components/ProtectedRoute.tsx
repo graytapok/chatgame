@@ -7,6 +7,7 @@ interface ProtectedRouteProps extends PropsWithChildren {
   loginRequired?: boolean;
   adminRequired?: boolean;
   element?: JSX.Element;
+  to?: string;
 }
 
 export const ProtectedRoute = ({
@@ -14,6 +15,7 @@ export const ProtectedRoute = ({
   adminRequired,
   element,
   children,
+  to = "/",
 }: ProtectedRouteProps) => {
   const { data, status } = useAuth();
 
@@ -22,11 +24,11 @@ export const ProtectedRoute = ({
       {status === "pending" ? (
         <></>
       ) : loginRequired && status === "error" ? (
-        <Navigate to="/" />
+        <Navigate to={to} />
       ) : adminRequired && status === "success" && !data?.admin ? (
-        <Navigate to="/" />
+        <Navigate to={to} />
       ) : !loginRequired && status === "success" ? (
-        <Navigate to="/" />
+        <Navigate to={to} />
       ) : element ? (
         element
       ) : (

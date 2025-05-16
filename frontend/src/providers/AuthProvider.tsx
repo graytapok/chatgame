@@ -7,6 +7,7 @@ import {
   useRequestsFrom,
   useRequestsTo,
 } from "src/hooks/api/friends";
+import { useBalance } from "src/hooks/api/store";
 import { FriendsSocket } from "src/sockets/friends";
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
@@ -15,6 +16,8 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   useFriends();
   useRequestsFrom();
   useRequestsTo();
+
+  useBalance();
 
   const user = useAppSelector((state) => state.user);
 

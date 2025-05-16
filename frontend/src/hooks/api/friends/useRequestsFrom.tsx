@@ -3,8 +3,10 @@ import { apiClient } from "..";
 import { FriendRequest } from "./useRequest";
 import { store } from "src/store";
 import { updateRequestsFrom } from "src/features/friendsSlice";
+import { useAppSelector } from "src/hooks";
 
 export const useRequestsFrom = () => {
+  const user = useAppSelector((s) => s.user);
   return useQuery({
     queryKey: ["friends", "requests", "from", "me"],
     queryFn: async () => {
@@ -17,5 +19,6 @@ export const useRequestsFrom = () => {
       return data;
     },
     retry: false,
+    enabled: !!user.id,
   });
 };

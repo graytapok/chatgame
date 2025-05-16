@@ -2,24 +2,20 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { User } from "src/hooks/api/auth";
 
 export interface UserState {
-  id: string;
-  username: string;
-  email: string;
-  admin: boolean;
-  createdAt: string;
-  authenticated: boolean;
+  id?: string;
+  username?: string;
+  email?: string;
+  admin?: boolean;
+  createdAt?: string;
 }
 
-const initialState: Partial<UserState> = {
-  authenticated: false,
-};
+const initialState: UserState = {};
 
 export const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
     login: (state, { payload }: PayloadAction<User>) => {
-      state.authenticated = true;
       state.id = payload.id;
       state.username = payload.username;
       state.email = payload.email;

@@ -24,7 +24,7 @@ def send_registration_email(user: UserModel):
 
     msg.html = render_template(
         "auth/register_email.html",
-        link=f"{config.DOMAIN}/register?t={token}"
+        link=f"{config.CLIENT_DOMAIN}/register?t={token}"
     )
 
     Thread(
@@ -42,7 +42,7 @@ def send_change_password_email(user: UserModel):
     )
     msg.html = render_template(
         "auth/password_email.html",
-        link=f"{config.DOMAIN}/forgot_password?t={token}"
+        link=f"{config.CLIENT_DOMAIN}/forgot_password?t={token}"
     )
 
     Thread(

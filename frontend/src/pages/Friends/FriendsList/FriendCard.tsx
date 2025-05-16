@@ -11,14 +11,14 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { Friend } from "src/features/friendsSlice";
 import { useRemoveFriend } from "src/hooks/api/friends";
-import { Friend } from "src/hooks/api/friends/useFriends";
 
 export const FriendCard = ({ friend }: { friend: Friend }) => {
   const [label, setLabel] = useState<string>();
 
   useEffect(() => {
-    const lastSeen = friend?.last_seen ? new Date(friend.last_seen) : undefined;
+    const lastSeen = friend?.lastSeen ? new Date(friend.lastSeen) : undefined;
 
     if (lastSeen) {
       const diff = Date.now() - lastSeen.getTime();
@@ -38,7 +38,7 @@ export const FriendCard = ({ friend }: { friend: Friend }) => {
         setLabel(`Last seen a few seconds ago`);
       }
     }
-  }, [friend.last_seen]);
+  }, [friend.lastSeen]);
 
   return (
     <Card>
@@ -112,7 +112,7 @@ const FriendMenu = ({ friend }: { friend: Friend }) => {
               <Button
                 variant="solid"
                 color="red"
-                onClick={() => mutate(friend.id)}
+                onClick={() => friend.id && mutate(friend.id)}
               >
                 Remove
               </Button>

@@ -37,9 +37,7 @@ const Players = ({ plus = false }: { plus?: boolean }) => {
       <Flex className="justify-center items-center gap-2">
         <DiffElo player={player} />
 
-        <Text>
-          {user.authenticated && player?.username ? player.username : "You"}
-        </Text>
+        <Text>{user.id && player?.username ? player.username : "You"}</Text>
 
         <Elo player={player} />
 

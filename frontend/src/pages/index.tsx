@@ -11,6 +11,7 @@ import AuthRoutes from "./(auth)";
 import LeaderboardRoutes from "./leaderboard";
 
 import { NotFound } from "./NotFound";
+import StoreRoutes from "./store";
 
 const AppRoutes = () => (
   <Routes>
@@ -25,6 +26,7 @@ const AppRoutes = () => (
       <Route path="/test/*" element={<TestRoutes />} />
       <Route path="/game/*" element={<GameRoutes />} />
       <Route path="/leaderboard/*" element={<LeaderboardRoutes />} />
+      <Route path="/store/*" element={<StoreRoutes />} />
 
       {AuthRoutes()}
 

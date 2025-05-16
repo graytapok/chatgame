@@ -10,7 +10,7 @@ export default function Leaderboard() {
   return (
     <>
       <PageHeading text="Best players of chatgame!" title="Leaderboard">
-        {user.authenticated && (
+        {user.id && (
           <div className="flex">
             Check out the leaderboard of your<span>&nbsp;</span>
             <Link to="/leaderboard/friends"> friends</Link>!

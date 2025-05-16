@@ -64,7 +64,7 @@ function TestQueryButtons() {
         </Button>
       </Flex>
 
-      {user.authenticated && (
+      {user.id && (
         <DataList.Root className="m-3">
           <DataList.Item align="center">
             <DataList.Label minWidth="88px">Status</DataList.Label>

@@ -13,9 +13,8 @@ dependencies = [
     "flask-pydantic>=0.12.0",
     "flask-sqlalchemy>=3.1.1",
     "psycopg2>=2.9.10",
-
     "pydantic[email]>=2.11.1",
     "pydantic-settings>=2.8.1",
-
     "pytest>=8.3.5",
+    "stripe>=12.0.0",
 ]

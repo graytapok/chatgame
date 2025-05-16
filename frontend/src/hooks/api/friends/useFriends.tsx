@@ -4,6 +4,7 @@ import { User } from "src/hooks/api/auth/useAuth";
 import { apiClient } from "..";
 import { store } from "src/store";
 import { updateFriends } from "src/features/friendsSlice";
+import { useAppSelector } from "src/hooks";
 
 export interface Friend extends User {
   online: boolean;
@@ -11,6 +12,7 @@ export interface Friend extends User {
 }
 
 export const useFriends = () => {
+  const user = useAppSelector((s) => s.user);
   return useQuery({
     queryKey: ["friends", "me"],
     queryFn: async () => {
@@ -22,5 +24,6 @@ export const useFriends = () => {
       return data;
     },
     retry: false,
+    enabled: !!user.id,
   });
 };

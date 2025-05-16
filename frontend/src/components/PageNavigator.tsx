@@ -1,11 +1,17 @@
 import { TriangleLeftIcon, TriangleRightIcon } from "@radix-ui/react-icons";
 import { IconButton, Select } from "@radix-ui/themes";
-import { useContext } from "react";
 
-import { LeaderboardContext } from ".";
+interface PageNavigatorProps {
+  setNewPage?: (value: string) => void;
+  page: number;
+  total_pages?: number;
+}
 
-export const Navigator = () => {
-  const { page, data, setNewPage } = useContext(LeaderboardContext);
+export const PageNavigator = ({
+  page,
+  setNewPage,
+  total_pages,
+}: PageNavigatorProps) => {
   return (
     <div className="mb-2 flex">
       <IconButton
@@ -24,8 +30,8 @@ export const Navigator = () => {
         <Select.Trigger />
         <Select.Content>
           <Select.Group>
-            {data?.pages &&
-              Array.from({ length: data?.pages }, (_, i) => (
+            {total_pages &&
+              Array.from({ length: total_pages }, (_, i) => (
                 <Select.Item key={i} value={(i + 1).toString()}>
                   {i + 1}
                 </Select.Item>
@@ -41,7 +47,7 @@ export const Navigator = () => {
         onClick={() =>
           setNewPage ? setNewPage((page + 1).toString()) : undefined
         }
-        disabled={data?.pages ? page >= data?.pages : true}
+        disabled={total_pages ? page >= total_pages : true}
       >
         <TriangleRightIcon />
       </IconButton>

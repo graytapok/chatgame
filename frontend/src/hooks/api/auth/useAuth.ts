@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { store } from "src/store";
 import { reset } from "src/features/friendsSlice";
 import { apiClient } from "src/hooks/api";
-import { queryClient } from "src/providers/QueryProvider";
 import { login, logout } from "src/features/userSlice";
+import { removeBalance } from "src/features/balanceSlice";
 
 export interface User {
   id: string;
@@ -22,24 +22,13 @@ export const useAuth = () => {
         const { data } = await apiClient.get("/users/me");
         store.dispatch(login(data));
 
-        queryClient.refetchQueries({
-          queryKey: ["friends", "me"],
-        });
-
-        queryClient.refetchQueries({
-          queryKey: ["friends", "requests", "from", "me"],
-        });
-
-        queryClient.refetchQueries({
-          queryKey: ["friends", "requests", "to", "me"],
-        });
-
         return data as User;
       } catch (error) {
         store.dispatch(logout());
         store.dispatch(reset());
+        store.dispatch(removeBalance());
 
-        return undefined;
+        throw error;
       }
     },
     retry: false,

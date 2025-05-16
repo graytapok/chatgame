@@ -6,9 +6,9 @@ from uuid import UUID, uuid4
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from chatgame.db.models.FriendModel import friend_table
 from chatgame.extensions import db, login
-from chatgame.db.models import TotalStatisticsModel, FriendRequestModel, FriendModel
+from chatgame.db.models import TotalStatisticsModel, FriendRequestModel, BalanceModel
+from chatgame.db.models.FriendModel import friend_table
 
 
 class UserModel(UserMixin, db.Model):
@@ -31,14 +31,18 @@ class UserModel(UserMixin, db.Model):
 
     statistics: Mapped["TotalStatisticsModel"] = relationship(back_populates="user", cascade="all, delete")
 
+    balance: Mapped["BalanceModel"] = relationship(back_populates="user", cascade="all, delete")
+
     sent_friend_requests: Mapped[list["FriendRequestModel"]] = relationship(
         back_populates="sender",
-        foreign_keys=[FriendRequestModel.sender_id]
+        foreign_keys=[FriendRequestModel.sender_id],
+        cascade="all, delete"
     )
 
     received_friend_requests: Mapped[list["FriendRequestModel"]] = relationship(
         back_populates="receiver",
-        foreign_keys=[FriendRequestModel.receiver_id]
+        foreign_keys=[FriendRequestModel.receiver_id],
+        cascade="all, delete"
     )
 
     friends: Mapped[list["UserModel"]] = relationship(

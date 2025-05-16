@@ -1,3 +1,5 @@
+import stripe
+
 from flask import Flask
 from flask_mail import Mail
 from flask_login import LoginManager
@@ -25,3 +27,5 @@ def init_extensions(app: Flask):
     migrate.init_app(app, db)
     socketio.init_app(app)
     scheduler.init_app(app)
+
+    stripe.api_key = config.STRIPE_SECRET_KEY

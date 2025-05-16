@@ -26,7 +26,8 @@ def get_user_statistics(user_id: str):
 @bp.get("/leaderboard")
 @validate()
 def get_leaderboard(query: LeaderboardQuery):
-    counter, leaderboard = StatisticsService.get_leaderboard(query.p, query.per)
+    leaderboard = StatisticsService.get_leaderboard(query.p, query.per)
+    top3 = StatisticsService.get_leaderboard_top_3()
 
     return LeaderboardDto(
         total=leaderboard.total,
@@ -35,14 +36,15 @@ def get_leaderboard(query: LeaderboardQuery):
         next_page=leaderboard.next_num,
         prev_page=leaderboard.prev_num,
         users=leaderboard.items,
-        top3=[LeaderboardUserDto.model_validate(i) for i in leaderboard.items[:3]]
+        top3=[LeaderboardUserDto.model_validate(i) for i in top3]
     )
 
 @bp.get("/leaderboard/friends")
 @login_required
 @validate()
 def get_friends_leaderboard(query: LeaderboardQuery):
-    counter, leaderboard = StatisticsService.get_friends_leaderboard(current_user, query.p, query.per)
+    leaderboard = StatisticsService.get_friends_leaderboard(current_user, query.p, query.per)
+    top3 = StatisticsService.get_friends_leaderboard_top_3(current_user)
 
     return LeaderboardDto(
         total=leaderboard.total,
@@ -51,5 +53,5 @@ def get_friends_leaderboard(query: LeaderboardQuery):
         next_page=leaderboard.next_num,
         prev_page=leaderboard.prev_num,
         users=leaderboard.items,
-        top3=[LeaderboardUserDto.model_validate(i) for i in leaderboard.items[:3]]
+        top3=[LeaderboardUserDto.model_validate(i) for i in top3]
     )

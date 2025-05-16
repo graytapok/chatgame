@@ -29,3 +29,4 @@ dist-ssr
 .idea
 __pycache__
 .pytest_cache
+.ruff_cache

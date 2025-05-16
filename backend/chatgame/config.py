@@ -16,7 +16,8 @@ class Config(BaseSettings):
     SESSION_COOKIE_SECURE: bool = True
 
     # General
-    DOMAIN: str = "http://localhost:5173"
+    CLIENT_DOMAIN: str = "http://localhost:5173"
+    DOMAIN: str = "http://localhost:5000"
     FRIEND_REQUEST_EXPIRATION_IN_MINUTES: int = 60
 
     # ItsDangerous
@@ -28,6 +29,15 @@ class Config(BaseSettings):
     DB_HOST: str
     DB_PORT: str
     DB_NAME: str
+
+    # Stripe
+    STRIPE_PUBLISHABLE_KEY: str
+    STRIPE_SECRET_KEY: str
+    STRIPE_WEBHOOK_KEY: str
+    CHAGCOINS_1000_PRICE_ID: str
+    CHAGCOINS_2500_PRICE_ID: str
+    CHAGCOINS_6000_PRICE_ID: str
+    CHAGCOINS_13000_PRICE_ID: str
 
     @property
     def SQLALCHEMY_DATABASE_URI(self):

@@ -1,15 +1,18 @@
 import { configureStore } from "@reduxjs/toolkit";
+
+import chatReducer from "./features/chatSlice";
 import userReducer from "src/features/userSlice";
 import gamesReducer from "./features/gamesSlice";
-import chatReducer from "./features/chatSlice";
 import friendsReducer from "./features/friendsSlice";
+import balanceReducer from "src/features/balanceSlice";
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
+    balance: balanceReducer,
+    friends: friendsReducer,
     games: gamesReducer,
     chat: chatReducer,
-    friends: friendsReducer,
   },
 });
 

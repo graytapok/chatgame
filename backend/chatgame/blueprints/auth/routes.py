@@ -1,7 +1,7 @@
 from flask_login import login_user, login_required, logout_user
 from flask_pydantic import validate
 
-from .dtos import *
+from .dto import *
 from .email import send_registration_email, send_change_password_email
 from .exceptions import *
 from .deps import no_login_required

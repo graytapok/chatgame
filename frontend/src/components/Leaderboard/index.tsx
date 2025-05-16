@@ -7,9 +7,9 @@ import {
   useFriendsLeaderboard,
   useLeaderboard,
 } from "src/hooks/api/statistics";
-import { Navigator } from "./Navigator";
 import { Podium } from "./Podium";
 import { UsersTable } from "./UsersTable";
+import { PageNavigator } from "../PageNavigator";
 
 interface LeaderboardPorps {
   queryHook: typeof useLeaderboard | typeof useFriendsLeaderboard;
@@ -57,14 +57,22 @@ export function Leaderboard({ queryHook }: LeaderboardPorps) {
       <Podium />
 
       <Card className="flex flex-col">
-        <Navigator />
+        <PageNavigator
+          page={page}
+          total_pages={data?.pages}
+          setNewPage={setNewPage}
+        />
 
         <UsersTable />
 
         {isLoading && <Spinner className="mx-auto my-6" size="3" />}
 
         <div className="flex justify-center mt-5">
-          <Navigator />
+          <PageNavigator
+            page={page}
+            total_pages={data?.pages}
+            setNewPage={setNewPage}
+          />
         </div>
       </Card>
     </LeaderboardContext.Provider>

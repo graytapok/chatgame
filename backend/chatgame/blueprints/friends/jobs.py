@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from sqlalchemy import delete
 
 from chatgame.db.models import FriendRequestModel
