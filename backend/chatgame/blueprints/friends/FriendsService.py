@@ -4,7 +4,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import joinedload
 
-from chatgame.constants import FriendRequestStatus
+from chatgame.constants import RequestStatus
 from chatgame.db.models import UserModel, FriendRequestModel, FriendModel
 from chatgame.exceptions import BadRequestException, NotFoundException, AlreadyExistsException
 from chatgame.extensions import db
@@ -116,10 +116,10 @@ class FriendsService:
         if datetime.now() > friend_request.expires_at:
             raise BadRequestException("Friend request expired.")
 
-        if friend_request.status != FriendRequestStatus.PENDING:
+        if friend_request.status != RequestStatus.PENDING:
             raise BadRequestException("Friend request already answered.")
 
-        friend_request.status = FriendRequestStatus.ACCEPTED if answer == "accept" else FriendRequestStatus.REJECTED
+        friend_request.status = RequestStatus.ACCEPTED if answer == "accept" else RequestStatus.REJECTED
 
         if answer == "accept":
             FriendsService.add_fiend(user, friend_request.sender_id)
@@ -136,7 +136,7 @@ class FriendsService:
             .query
             .where(
                 FriendRequestModel.receiver_id == user.id,
-                FriendRequestModel.status == FriendRequestStatus.PENDING,
+                FriendRequestModel.status == RequestStatus.PENDING,
                 datetime.now() < FriendRequestModel.expires_at
             )
             .order_by(
@@ -152,7 +152,7 @@ class FriendsService:
             .query
             .where(
                 FriendRequestModel.sender_id == user.id,
-                FriendRequestModel.status == FriendRequestStatus.PENDING,
+                FriendRequestModel.status == RequestStatus.PENDING,
                 datetime.now() < FriendRequestModel.expires_at
             )
             .order_by(

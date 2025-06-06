@@ -2,13 +2,13 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from chatgame.constants import FriendRequestStatus
+from chatgame.constants import RequestStatus
 from chatgame.db.dto import UserDto
 
 
 class FriendRequestDto(BaseModel):
     id: int
-    status: FriendRequestStatus
+    status: RequestStatus
 
     sender: UserDto
     receiver: UserDto

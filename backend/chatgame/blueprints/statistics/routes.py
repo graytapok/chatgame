@@ -3,7 +3,7 @@ from flask_pydantic import validate
 
 from .dto import LeaderboardUserDto, LeaderboardQuery, LeaderboardDto
 from ..auth.deps import admin_required
-from ..statistics import bp, StatisticsService
+from . import bp, StatisticsService
 from chatgame.db.dto import TotalStatisticsDto
 
 

@@ -7,7 +7,7 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from chatgame.extensions import db, login
-from chatgame.db.models import TotalStatisticsModel, FriendRequestModel, BalanceModel
+from chatgame.db.models import TotalStatisticsModel, FriendRequestModel, BalanceModel, InviteModel
 from chatgame.db.models.FriendModel import friend_table
 
 
@@ -29,19 +29,30 @@ class UserModel(UserMixin, db.Model):
     verification_token: Mapped[str] = mapped_column(nullable=True)
     password_token: Mapped[str] = mapped_column(nullable=True)
 
-    statistics: Mapped["TotalStatisticsModel"] = relationship(back_populates="user", cascade="all, delete")
+    statistics: Mapped[TotalStatisticsModel] = relationship(back_populates="user", cascade="all, delete")
 
-    balance: Mapped["BalanceModel"] = relationship(back_populates="user", cascade="all, delete")
+    balance: Mapped[BalanceModel] = relationship(back_populates="user", cascade="all, delete")
 
-    sent_friend_requests: Mapped[list["FriendRequestModel"]] = relationship(
+    sent_friend_requests: Mapped[list[FriendRequestModel]] = relationship(
         back_populates="sender",
         foreign_keys=[FriendRequestModel.sender_id],
         cascade="all, delete"
     )
 
-    received_friend_requests: Mapped[list["FriendRequestModel"]] = relationship(
+    received_friend_requests: Mapped[list[FriendRequestModel]] = relationship(
         back_populates="receiver",
         foreign_keys=[FriendRequestModel.receiver_id],
+        cascade="all, delete"
+    )
+
+    sent_invites: Mapped[list[InviteModel]] = relationship(
+        back_populates="sender",
+        foreign_keys=[InviteModel.sender_user_id],
+        cascade="all, delete"
+    )
+    received_invites: Mapped[list[InviteModel]] = relationship(
+        back_populates="receiver",
+        foreign_keys=[InviteModel.receiver_user_id],
         cascade="all, delete"
     )
 

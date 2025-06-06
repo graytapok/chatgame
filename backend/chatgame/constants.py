@@ -5,7 +5,7 @@ class Game(Enum):
     TICTACTOE = "tictactoe"
     TICTACTOE_PLUS = "tictactoe_plus"
 
-class FriendRequestStatus(Enum):
+class RequestStatus(Enum):
     PENDING = "pending"
     ACCEPTED = "accepted"
     REJECTED = "rejected"

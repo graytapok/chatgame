@@ -4,6 +4,7 @@ from .FriendRequestModel import FriendRequestModel
 from .OwnedItemModel import OwnedItemModel
 from .BalanceModel import BalanceModel
 from .PaymentModel import PaymentModel
+from .InviteModel import InviteModel
 from .FriendModel import FriendModel
 from .ItemModel import ItemModel
 from .UserModel import UserModel

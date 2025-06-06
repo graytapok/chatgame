@@ -5,7 +5,7 @@ from sqlalchemy import ForeignKey, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatgame.config import config
-from chatgame.constants import FriendRequestStatus
+from chatgame.constants import RequestStatus
 from chatgame.extensions import db
 
 
@@ -14,7 +14,7 @@ class FriendRequestModel(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    status: Mapped[FriendRequestStatus] = mapped_column(Enum(FriendRequestStatus), default=FriendRequestStatus.PENDING, nullable=False)
+    status: Mapped[RequestStatus] = mapped_column(Enum(RequestStatus), default=RequestStatus.PENDING, nullable=False)
 
     sender_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"), nullable=False)
     sender: Mapped["UserModel"] = relationship(back_populates="sent_friend_requests", foreign_keys=[sender_id])
